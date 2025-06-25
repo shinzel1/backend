@@ -15,16 +15,19 @@ $headers = getallheaders();
 if (isset($headers['Authorization'])) {
     $authHeader = $headers['Authorization'];
     $token = str_replace('Bearer ', '', $authHeader);
-        $user = verifyJWT($token);
+    $user = verifyJWT($token);
 }
 
 // ✅ Get limit from query string
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 3;
-if ($limit <= 0) $limit = 3;
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM restaurants ORDER BY id DESC LIMIT :limit");
-    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    if ($limit === -1) {
+        $stmt = $pdo->query("SELECT * FROM restaurants ORDER BY id DESC");
+    } else {
+        // 🚨 Do NOT use bindValue for LIMIT — instead, inject the integer directly
+        $stmt = $pdo->query("SELECT * FROM restaurants ORDER BY id DESC LIMIT $limit");
+    }
     $stmt->execute();
     $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($restaurants);
