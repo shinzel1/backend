@@ -2,6 +2,12 @@
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
+session_start();
+
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: admin-login.php');
+    exit;
+}
 
 require_once __DIR__ . '/db.php'; // Adjust path as needed
 
@@ -78,7 +84,8 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
 
 <body>
 
-    <h1>Uploaded Restaurants</h1>
+    <h1>Uploaded Restaurants <a href="admin-logout.php">Logout</a>
+</h1>
 
     <?php if (!empty($restaurants)): ?>
         <table>
