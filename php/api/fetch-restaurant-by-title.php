@@ -117,6 +117,7 @@ try {
         "image" => $restaurant["image"],
         "locationUrl" => $restaurant["locationUrl"],
         "menuImage" => $restaurant["menuImage"],
+        "signature_cocktails" => $restaurant["signature_cocktails"],
         "created_at" => $restaurant["created_at"]
     ];
 

@@ -93,7 +93,8 @@ try {
         tags = :tags,
         locationUrl = :locationUrl,
         image = :image,
-        menuImage = :menuImage
+        menuImage = :menuImage,
+        signature_cocktails = :signature_cocktails
         WHERE id = :id");
 
     $stmt->execute([
@@ -125,6 +126,7 @@ try {
         ':locationUrl' => safe($restaurant, 'locationUrl'),
         ':image' => safe($restaurant, 'image'),
         ':menuImage' => safeJson($restaurant, 'menuImage'),
+        ':signature_cocktails' => safeJson($restaurant, 'signature_cocktails'),
     ]);
 
     echo json_encode(["success" => true]);

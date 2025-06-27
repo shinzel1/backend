@@ -118,6 +118,7 @@ try {
         "image" => $row["image"],
         "locationUrl" => $row["locationUrl"],
         "menuImage" => $row["menuImage"],
+        "signature_cocktails" => $row["signature_cocktails"],
         "created_at" => $row["created_at"]
     ];
 

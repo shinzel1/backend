@@ -61,7 +61,7 @@ try {
     must_try, service_description, service_style,
     reasons_to_visit, tips_for_visitors,
     location_details, additional_info,chef_recommendations,event_hosting,nutritional_breakdown, rating,
-    category, tags, locationUrl, image, menuImage
+    category, tags, locationUrl, image, menuImage,signature_cocktails
   ) VALUES (
     :name, :city, :restaurantOrCafe, :title, :location, :overview, :shortDescription,
     :ambiance_description, :ambiance_features,
@@ -69,7 +69,7 @@ try {
     :must_try, :service_description, :service_style,
     :reasons_to_visit, :tips_for_visitors,
     :location_details, :additional_info,:chef_recommendations,:event_hosting,:nutritional_breakdown, :rating,
-    :category, :tags, :locationUrl, :image, :menuImage
+    :category, :tags, :locationUrl, :image, :menuImage,:signature_cocktails
   )
 ");
 
@@ -101,6 +101,7 @@ try {
         ':locationUrl' => safe($restaurant, 'locationUrl'),
         ':image' => safe($restaurant, 'image'),
         ':menuImage' => safeJson($restaurant, 'menuImage'),
+        ':signature_cocktails' => safeJson($restaurant ,'signature_cocktails'),
     ]);
 
     echo json_encode(["success" => true, "id" => $pdo->lastInsertId()]);
