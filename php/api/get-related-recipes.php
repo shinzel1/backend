@@ -39,7 +39,7 @@ try {
         echo json_encode(["error" => "Invalid or expired token"]);
         exit;
     }
-    $query = "SELECT title, slug, created_at 
+    $query = "SELECT title, slug, created_at ,cover_image
               FROM recipes 
               WHERE slug != :exclude 
               ORDER BY created_at DESC 
