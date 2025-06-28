@@ -71,7 +71,8 @@ try {
         'menuImage',
         'chef_recommendations',
         'event_hosting',
-        'nutritional_breakdown'
+        'nutritional_breakdown',
+        'signature_cocktails'
     ];
 
     foreach ($jsonFields as $field) {
