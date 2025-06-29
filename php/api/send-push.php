@@ -1,5 +1,5 @@
 <?php
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 require_once './db.php';
 
 use Minishlink\WebPush\WebPush;
