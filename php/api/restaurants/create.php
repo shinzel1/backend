@@ -107,6 +107,7 @@ try {
 
     // ✅ Trigger push notification
     $restaurantTitle = safe($restaurant, 'name', safe($restaurant, 'name', 'a new restaurant')) . " " . safe($restaurant, 'location', safe($restaurant, 'location', 'a new restaurant'));
+    $url = "https://crowndevour.com/" . strtolower(safe($restaurant, 'city')) . "/" . strtolower(safe($restaurant, 'restaurantOrCafe')) . "/" . safe($restaurant, 'title');
     require_once "../send-push.php";
 } catch (PDOException $e) {
     http_response_code(500);

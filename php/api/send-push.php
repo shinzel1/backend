@@ -34,6 +34,9 @@ foreach ($subs as $sub) {
     $webPush->queueNotification($subscription, json_encode([
         'title' => $title,
         'body' => $body,
+        'data' => [
+            'url' => $url,
+        ],
     ]));
 }
 
