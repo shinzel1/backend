@@ -1,10 +1,9 @@
 <?php
 // ✅ CORS Headers
-header("Access-Control-Allow-Origin: *"); // or use your domain like https://crowndevour.com
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
-// ✅ Handle preflight request (CORS preflight)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -19,6 +18,7 @@ require_once './db.php';
 // ✅ Input handling
 $input = json_decode(file_get_contents("php://input"), true);
 $query = isset($input['query']) ? trim($input['query']) : null;
+$category = isset($input['category']) ? trim(strtolower($input['category'])) : 'all';
 
 if (!$query || strlen($query) < 2) {
     http_response_code(400);
@@ -26,7 +26,7 @@ if (!$query || strlen($query) < 2) {
     exit;
 }
 
-// ✅ SQL search query
+// ✅ SQL LIKE search query
 $words = preg_split('/\s+/', $query);
 $likeClauses = [];
 $params = [];
@@ -37,7 +37,15 @@ foreach ($words as $index => $word) {
     $params[$key] = '%' . strtolower($word) . '%';
 }
 
-$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $likeClauses) . " ORDER BY rating DESC LIMIT 20";
+// ✅ Optional category filter
+$categoryClause = '';
+if ($category !== 'all') {
+    $categoryClause = " AND LOWER(restaurantOrCafe) = :category";
+    $params[':category'] = $category;
+}
+
+// ✅ Build and execute query
+$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $likeClauses) . $categoryClause . " ORDER BY rating DESC LIMIT 20";
 
 try {
     $stmt = $pdo->prepare($sql);
@@ -57,6 +65,7 @@ try {
         'tags',
         'menuImage'
     ];
+
     foreach ($results as &$row) {
         foreach ($jsonFields as $field) {
             if (isset($row[$field])) {
