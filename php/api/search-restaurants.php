@@ -17,35 +17,38 @@ require_once './db.php';
 
 // ✅ Input handling
 $input = json_decode(file_get_contents("php://input"), true);
-$query = isset($input['query']) ? trim($input['query']) : null;
-$category = isset($input['category']) ? trim(strtolower($input['category'])) : 'all';
+$query = trim($input['query'] ?? '');
+$category = strtolower(trim($input['category'] ?? 'all'));
 
-if (!$query || strlen($query) < 2) {
+$params = [];
+$whereClauses = [];
+
+// ✅ Case 1: query is present → normal word-based matching
+if ($query) {
+    $words = preg_split('/\s+/', $query);
+    foreach ($words as $index => $word) {
+        $key = ":word$index";
+        $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
+        $params[$key] = '%' . strtolower($word) . '%';
+    }
+}
+
+// ✅ Case 2: query is empty, but category is specific → treat category like a keyword
+else if ($category !== 'all') {
+    $key = ':categoryWord';
+    $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
+    $params[$key] = '%' . $category . '%';
+}
+
+// ✅ Exit early if both query and category are empty/default
+if (empty($whereClauses)) {
     http_response_code(400);
-    echo json_encode(["error" => "Query too short"]);
+    echo json_encode(["error" => "No search query or category provided."]);
     exit;
 }
 
-// ✅ SQL LIKE search query
-$words = preg_split('/\s+/', $query);
-$likeClauses = [];
-$params = [];
-
-foreach ($words as $index => $word) {
-    $key = ":word$index";
-    $likeClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
-    $params[$key] = '%' . strtolower($word) . '%';
-}
-
-// ✅ Optional category filter
-$categoryClause = '';
-if ($category !== 'all') {
-    $categoryClause = " AND LOWER(restaurantOrCafe) = :category";
-    $params[':category'] = $category;
-}
-
-// ✅ Build and execute query
-$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $likeClauses) . $categoryClause . " ORDER BY rating DESC LIMIT 20";
+// ✅ Build and run SQL
+$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $whereClauses) . " ORDER BY rating DESC LIMIT 20";
 
 try {
     $stmt = $pdo->prepare($sql);
@@ -65,7 +68,6 @@ try {
         'tags',
         'menuImage'
     ];
-
     foreach ($results as &$row) {
         foreach ($jsonFields as $field) {
             if (isset($row[$field])) {
