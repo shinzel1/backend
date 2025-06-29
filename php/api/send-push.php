@@ -15,22 +15,34 @@ $auth = [
 
 $webPush = new WebPush($auth);
 
-// Fetch all subscriptions
-$stmt = $pdo->query("SELECT * FROM push_subscriptions");
-$subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Pull from scope
+$restaurantTitle = $restaurantTitle ?? 'a new restaurant';
 
 // Notification payload
-$payload = json_encode([
-    'title' => '🆕 New Blog Post!',
-    'body' => 'Check out the latest blog now on CrownDevour.',
-]);
+$title = '🍽️ New Restaurant Alert!';
+$body = "Check out \"$restaurantTitle\" just added on CrownDevour!";
 
-foreach ($subscriptions as $sub) {
+$stmt = $pdo->query("SELECT * FROM push_subscriptions");
+$subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($subs as $sub) {
     $subscription = Subscription::create([
         'endpoint' => $sub['endpoint'],
         'publicKey' => $sub['p256dh'],
         'authToken' => $sub['auth'],
     ]);
 
-    $webPush->sendNotification($subscription, $payload);
+    $webPush->queueNotification($subscription, json_encode([
+        'title' => $title,
+        'body' => $body,
+    ]));
 }
+
+foreach ($webPush->flush() as $report) {
+    if (!$report->isSuccess()) {
+        $endpoint = $report->getRequest()->getUri()->__toString();
+        $del = $pdo->prepare("DELETE FROM push_subscriptions WHERE endpoint = :endpoint");
+        $del->execute([':endpoint' => $endpoint]);
+    }
+}
+?>
