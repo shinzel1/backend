@@ -52,9 +52,21 @@ try {
     ]);
 
     echo json_encode(["message" => "Blog uploaded successfully!"]);
-    // Blog is inserted successfully, now trigger push
-    // exec("php /full/path/to/send-push.php");
 
+    $blogTitle = $title ?? 'a new blog';
+    $url = "https://crowndevour.com/blogs/" . $slug;
+    // Notification payload
+    $title = '🍽️ New blog Alert!';
+    $body = "Check out \"$blogTitle\" just added on CrownDevour!";
+
+    $dataPack = [
+        'title' => $title,
+        'body' => $body,
+        'data' => [
+            'url' => $url,
+        ]
+    ];
+    require_once "./send-push.php";
 } catch (PDOException $e) {
     if ($e->getCode() === '23000') {
         http_response_code(409);

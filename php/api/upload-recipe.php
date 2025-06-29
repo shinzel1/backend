@@ -15,7 +15,7 @@ try {
 
     // Required fields
     if (
-        !$data || 
+        !$data ||
         !isset($data['title'], $data['slug'], $data['ingredients'], $data['instructions'])
     ) {
         echo json_encode(["error" => "Missing required fields"]);
@@ -73,6 +73,21 @@ try {
     ]);
 
     echo json_encode(["message" => "Recipe uploaded successfully"]);
+    // Pull from scope
+    $recipeTitle = $data['title'] ?? 'a new recipe';
+    $url = "https://crowndevour.com/recipes/" . $data['slug'];
+    // Notification payload
+    $title = '🍽️ New Recipe Alert!';
+    $body = "Check out \"$recipeTitle\" just added on CrownDevour!";
+
+    $dataPack = [
+        'title' => $title,
+        'body' => $body,
+        'data' => [
+            'url' => $url,
+        ]
+    ];
+    require_once "./send-push.php";
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["error" => "Database error: " . $e->getMessage()]);
