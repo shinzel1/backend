@@ -107,7 +107,7 @@ try {
 
     // ✅ Trigger push notification
     $restaurantTitle = safe($restaurant, 'title', safe($restaurant, 'name', 'a new restaurant'));
-    require_once '../send-push.php'; // send-push.php will use $restaurantTitle
+    require_once realpath(__DIR__ . '/../send-push.php');
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["error" => $e->getMessage()]);
