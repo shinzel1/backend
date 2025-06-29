@@ -1,6 +1,6 @@
 <?php
-require_once realpath(__DIR__ . '/../vendor/autoload.php');
-require_once realpath(__DIR__ . '/../db.php');
+require_once __DIR__ . '/../db.php'; // ✅ Correct (goes to php/db.php)
+require_once __DIR__ . '/../vendor/autoload.php'; // ✅ Correct (goes to php/db.php)
 
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
