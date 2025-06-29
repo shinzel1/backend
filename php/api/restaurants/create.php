@@ -106,7 +106,7 @@ try {
     echo json_encode(["success" => true, "id" => $pdo->lastInsertId()]);
 
     // ✅ Trigger push notification
-    $restaurantTitle = safe($restaurant, 'title', safe($restaurant, 'name', 'a new restaurant'));
+    $restaurantTitle = safe($restaurant, 'name', safe($restaurant, 'name', 'a new restaurant'));
     require_once "../send-push.php";
 } catch (PDOException $e) {
     http_response_code(500);
