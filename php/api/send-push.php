@@ -13,14 +13,6 @@ $auth = [
 ];
 
 $webPush = new WebPush($auth);
-
-// Pull from scope
-$restaurantTitle = $restaurantTitle ?? 'a new restaurant';
-
-// Notification payload
-$title = '🍽️ New Restaurant Alert!';
-$body = "Check out \"$restaurantTitle\" just added on CrownDevour!";
-
 $stmt = $pdo->query("SELECT * FROM push_subscriptions");
 $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -30,14 +22,8 @@ foreach ($subs as $sub) {
         'publicKey' => $sub['p256dh'],
         'authToken' => $sub['auth'],
     ]);
-
-    $webPush->queueNotification($subscription, json_encode([
-        'title' => $title,
-        'body' => $body,
-        'data' => [
-            'url' => $url,
-        ],
-    ]));
+    $webPush->queueNotification($subscription, json_encode($dataPack,
+    ));
 }
 
 foreach ($webPush->flush() as $report) {
