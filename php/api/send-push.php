@@ -1,6 +1,6 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php'; // ✅ Correct relative to send-push.php
-require_once __DIR__ . '/../db.php'; // ✅ Correct (goes to php/db.php)
+require '../vendor/autoload.php';
+require_once './db.php';
 
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
