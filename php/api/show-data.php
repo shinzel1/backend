@@ -13,7 +13,7 @@ require_once __DIR__ . '/db.php'; // Adjust path as needed
 
 try {
     // Query to fetch restaurant data
-    $stmt = $pdo->query("SELECT id, name, city, location, overview, shortDescription, rating FROM restaurants ORDER BY id DESC");
+    $stmt = $pdo->query("SELECT id, name,title, city, location, overview, shortDescription, rating FROM restaurants ORDER BY id DESC");
     $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
@@ -85,7 +85,7 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
 <body>
 
     <h1>Uploaded Restaurants <a href="admin-logout.php">Logout</a>
-</h1>
+    </h1>
 
     <?php if (!empty($restaurants)): ?>
         <table>
@@ -93,6 +93,7 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Title</th>
                     <th>City</th>
                     <th>Location</th>
                     <th>Overview</th>
@@ -106,6 +107,7 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
                                 href="<?= htmlspecialchars($host) ?>/restaurants/<?= safeOutput($restaurant['id']) ?>/edit"><?= safeOutput($restaurant['id']) ?></a>
                         </td>
                         <td><?= safeOutput($restaurant['name']) ?></td>
+                        <td><?= safeOutput($restaurant['title']) ?></td>
                         <td><?= safeOutput($restaurant['city']) ?></td>
                         <td><?= safeOutput($restaurant['location']) ?></td>
                         <td><?= safeOutput($restaurant['overview']) ?></td>
