@@ -48,7 +48,7 @@ if (empty($whereClauses)) {
 }
 
 // ✅ Build and run SQL
-$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $whereClauses) . " ORDER BY rating DESC LIMIT 20";
+$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $whereClauses) . " ORDER BY rating DESC LIMIT 10";
 
 try {
     $stmt = $pdo->prepare($sql);
