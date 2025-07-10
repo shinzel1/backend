@@ -24,7 +24,7 @@ try {
 
     // Assign variables with fallbacks
     $title = $data['title'];
-    $slug = preg_replace('/\s+/', '-', $data['slug']);
+    $slug = strtolower(preg_replace('/\s+/', '-', $data['slug']));
     $description = $data['description'] ?? '';
     $ingredients = $data['ingredients'];
     $instructions = $data['instructions'];
