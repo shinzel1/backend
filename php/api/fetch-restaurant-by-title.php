@@ -118,7 +118,10 @@ try {
         "image" => $restaurant["image"],
         "locationUrl" => $restaurant["locationUrl"],
         "menuImage" => $restaurant["menuImage"],
-        "signature_cocktails" => $restaurant["signature_cocktails"],
+        "signature_cocktails" => $restaurant["signature_cocktails"],        "status" => $row["status"] ?? null,
+        "gallery" => $row["gallery"] ?? [],
+        "cuisines" => $row["cuisines"] ?? [],
+        "delivery" => (bool) $row["delivery"],
         "created_at" => $restaurant["created_at"]
     ];
 

@@ -59,7 +59,8 @@ try {
         must_try, service_description, service_style,
         reasons_to_visit, tips_for_visitors,
         location_details, additional_info, chef_recommendations, event_hosting, nutritional_breakdown, rating,
-        category, tags, locationUrl, image, menuImage, signature_cocktails
+        category, tags, locationUrl, image, menuImage, signature_cocktails,
+        status, gallery, cuisines, delivery
     ) VALUES (
         :name, :city, :restaurantOrCafe, :title, :location, :overview, :shortDescription,
         :ambiance_description, :ambiance_features,
@@ -67,9 +68,9 @@ try {
         :must_try, :service_description, :service_style,
         :reasons_to_visit, :tips_for_visitors,
         :location_details, :additional_info, :chef_recommendations, :event_hosting, :nutritional_breakdown, :rating,
-        :category, :tags, :locationUrl, :image, :menuImage, :signature_cocktails
-    )
-");
+        :category, :tags, :locationUrl, :image, :menuImage, :signature_cocktails,
+        :status, :gallery, :cuisines, :delivery
+    )");
 
     $stmt->execute([
         ':name' => safe($restaurant, 'name'),
@@ -100,29 +101,21 @@ try {
         ':image' => safe($restaurant, 'image'),
         ':menuImage' => safeJson($restaurant, 'menuImage'),
         ':signature_cocktails' => safeJson($restaurant, 'signature_cocktails'),
+        ':status' => safe($restaurant, 'status'),
+        ':gallery' => safeJson($restaurant, 'gallery'),
+        ':cuisines' => safeJson($restaurant, 'cuisines'),
+        ':delivery' => !empty($restaurant['delivery']) ? 1 : 0
     ]);
 
-    // ✅ Success response
     echo json_encode(["success" => true, "id" => $pdo->lastInsertId()]);
 
-    // ✅ Trigger push notification
-    $restaurantTitle = safe($restaurant, 'name', safe($restaurant, 'name', 'a new restaurant')) . " " . safe($restaurant, 'location', safe($restaurant, 'location', 'a new restaurant'));
+    $restaurantTitle = safe($restaurant, 'name', 'New Restaurant') . " " . safe($restaurant, 'location', '');
     $url = "https://crowndevour.com/" . strtolower(safe($restaurant, 'city')) . "/" . strtolower(safe($restaurant, 'restaurantOrCafe')) . "/" . safe($restaurant, 'title');
 
-
-    // Pull from scope
-    $restaurantTitle = $restaurantTitle ?? 'a new restaurant';
-
-    // Notification payload
-    $title = '🍽️ New Restaurant Alert!';
-    $body = "Check out \"$restaurantTitle\" just added on CrownDevour!";
-
     $dataPack = [
-        'title' => $title,
-        'body' => $body,
-        'data' => [
-            'url' => $url,
-        ]
+        'title' => '🍽️ New Restaurant Alert!',
+        'body' => "Check out \"$restaurantTitle\" just added on CrownDevour!",
+        'data' => [ 'url' => $url ]
     ];
     require_once "../send-push.php";
 } catch (PDOException $e) {

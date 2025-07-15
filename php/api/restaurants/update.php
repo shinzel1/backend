@@ -1,6 +1,5 @@
 <?php
-// ✅ CORS Headers - Required for PUT from frontend (like Next.js)
-header("Access-Control-Allow-Origin: *"); // or specify your domain
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
@@ -9,20 +8,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// ✅ Only accept PUT requests for update
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405);
     echo json_encode(["error" => "Only PUT requests are allowed"]);
     exit;
 }
 
-
 require_once '../db.php';
-require_once '../auth.php'; // Uncomment if you're using auth
-// ✅ Use getallheaders() for broader compatibility
-$headers = getallheaders();
+require_once '../auth.php';
 
-// ✅ Normalize header key casing
+$headers = getallheaders();
 $authorizationHeader = '';
 foreach ($headers as $key => $value) {
     if (strtolower($key) === 'authorization') {
@@ -37,31 +32,26 @@ if (!$authorizationHeader) {
     exit;
 }
 
-// ✅ Extract token from "Bearer ..." header
 $token = str_replace('Bearer ', '', $authorizationHeader);
-
-// ✅ Verify token
 $user = verifyJWT($token);
 if (!$user) {
     http_response_code(403);
     echo json_encode(["error" => "Invalid or expired token"]);
     exit;
 }
-// ✅ Read JSON body
-$restaurant = json_decode(file_get_contents("php://input"), true);
 
+$restaurant = json_decode(file_get_contents("php://input"), true);
 if (!$restaurant || !isset($restaurant['id'])) {
     http_response_code(400);
     echo json_encode(["error" => "Invalid JSON body or missing ID"]);
     exit;
 }
-function safe($array, $key, $default = null)
-{
+
+function safe($array, $key, $default = null) {
     return isset($array[$key]) && $array[$key] !== '' ? $array[$key] : $default;
 }
 
-function safeJson($array, $key)
-{
+function safeJson($array, $key) {
     return json_encode($array[$key] ?? []);
 }
 
@@ -94,7 +84,11 @@ try {
         locationUrl = :locationUrl,
         image = :image,
         menuImage = :menuImage,
-        signature_cocktails = :signature_cocktails
+        signature_cocktails = :signature_cocktails,
+        status = :status,
+        gallery = :gallery,
+        cuisines = :cuisines,
+        delivery = :delivery
         WHERE id = :id");
 
     $stmt->execute([
@@ -127,6 +121,10 @@ try {
         ':image' => safe($restaurant, 'image'),
         ':menuImage' => safeJson($restaurant, 'menuImage'),
         ':signature_cocktails' => safeJson($restaurant, 'signature_cocktails'),
+        ':status' => safe($restaurant, 'status'),
+        ':gallery' => safeJson($restaurant, 'gallery'),
+        ':cuisines' => safeJson($restaurant, 'cuisines'),
+        ':delivery' => !empty($restaurant['delivery']) ? 1 : 0
     ]);
 
     echo json_encode(["success" => true]);

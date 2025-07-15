@@ -1,6 +1,5 @@
 <?php
-// File: restaurants/read.php
-header("Access-Control-Allow-Origin: *"); // or specify your domain
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
@@ -8,12 +7,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit();
 }
+
 require_once '../db.php';
 require_once '../auth.php';
-// ✅ Use getallheaders() for broader compatibility
-$headers = getallheaders();
 
-// ✅ Normalize header key casing
+$headers = getallheaders();
 $authorizationHeader = '';
 foreach ($headers as $key => $value) {
     if (strtolower($key) === 'authorization') {
@@ -28,10 +26,7 @@ if (!$authorizationHeader) {
     exit;
 }
 
-// ✅ Extract token from "Bearer ..." header
 $token = str_replace('Bearer ', '', $authorizationHeader);
-
-// ✅ Verify token
 $user = verifyJWT($token);
 if (!$user) {
     http_response_code(403);
@@ -57,7 +52,7 @@ try {
         exit;
     }
 
-    // JSON fields to decode
+    // Decode JSON fields
     $jsonFields = [
         'ambiance_features',
         'cuisine_menu_sections',
@@ -72,7 +67,9 @@ try {
         'chef_recommendations',
         'event_hosting',
         'nutritional_breakdown',
-        'signature_cocktails'
+        'signature_cocktails',
+        'gallery',
+        'cuisines'
     ];
 
     foreach ($jsonFields as $field) {
@@ -82,7 +79,7 @@ try {
         }
     }
 
-    // Assemble the final response
+    // Assemble full structured response
     $response = [
         "id" => (int) $row["id"],
         "name" => $row["name"],
@@ -109,9 +106,9 @@ try {
         "tips_for_visitors" => $row["tips_for_visitors"],
         "location_details" => $row["location_details"],
         "additional_info" => $row["additional_info"],
-        "chef_recommendations" => $row["chef_recommendations"] ?? [],
-        "event_hosting" => $row["event_hosting"] ?? [],
-        "nutritional_breakdown" => $row["nutritional_breakdown"] ?? [],
+        "chef_recommendations" => $row["chef_recommendations"],
+        "event_hosting" => $row["event_hosting"],
+        "nutritional_breakdown" => $row["nutritional_breakdown"],
         "rating" => (float) $row["rating"],
         "review_count" => isset($row["review_count"]) ? (int) $row["review_count"] : 0,
         "category" => $row["category"],
@@ -120,7 +117,12 @@ try {
         "locationUrl" => $row["locationUrl"],
         "menuImage" => $row["menuImage"],
         "signature_cocktails" => $row["signature_cocktails"],
-        "created_at" => $row["created_at"]
+        "created_at" => $row["created_at"],
+        // ✅ New fields
+        "status" => $row["status"] ?? null,
+        "gallery" => $row["gallery"] ?? [],
+        "cuisines" => $row["cuisines"] ?? [],
+        "delivery" => (bool) $row["delivery"]
     ];
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
