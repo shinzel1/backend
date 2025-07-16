@@ -118,11 +118,10 @@ try {
         "menuImage" => $row["menuImage"],
         "signature_cocktails" => $row["signature_cocktails"],
         "created_at" => $row["created_at"],
-        // ✅ New fields
         "status" => $row["status"] ?? null,
         "gallery" => $row["gallery"] ?? [],
         "cuisines" => $row["cuisines"] ?? [],
-        "delivery" => (bool) $row["delivery"]
+        "delivery" => $row["delivery"] ?? false
     ];
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
