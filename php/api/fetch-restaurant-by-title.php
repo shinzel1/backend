@@ -72,7 +72,9 @@ try {
         'chef_recommendations',
         'event_hosting',
         'nutritional_breakdown',
-        'signature_cocktails'
+        'signature_cocktails',
+        'contact_info',
+        'reservations'
     ];
 
     foreach ($jsonFields as $field) {
@@ -118,11 +120,13 @@ try {
         "image" => $restaurant["image"],
         "locationUrl" => $restaurant["locationUrl"],
         "menuImage" => $restaurant["menuImage"],
-        "signature_cocktails" => $restaurant["signature_cocktails"],    
+        "signature_cocktails" => $restaurant["signature_cocktails"],
         "status" => $row["status"] ?? null,
         "gallery" => $row["gallery"] ?? [],
         "cuisines" => $row["cuisines"] ?? [],
         "delivery" => $row["delivery"] ?? false,
+        "contact_info" => $restaurant["contact_info"] ?? [],
+        "reservations" => $restaurant["reservations"] ?? [],
         "created_at" => $restaurant["created_at"]
     ];
 

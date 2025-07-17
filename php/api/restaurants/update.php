@@ -47,11 +47,13 @@ if (!$restaurant || !isset($restaurant['id'])) {
     exit;
 }
 
-function safe($array, $key, $default = null) {
+function safe($array, $key, $default = null)
+{
     return isset($array[$key]) && $array[$key] !== '' ? $array[$key] : $default;
 }
 
-function safeJson($array, $key) {
+function safeJson($array, $key)
+{
     return json_encode($array[$key] ?? []);
 }
 
@@ -88,7 +90,8 @@ try {
         status = :status,
         gallery = :gallery,
         cuisines = :cuisines,
-        delivery = :delivery
+        delivery = :delivery,
+        contact_info = :contact_info ,reservations = :reservations,
         WHERE id = :id");
 
     $stmt->execute([
@@ -124,7 +127,9 @@ try {
         ':status' => safe($restaurant, 'status'),
         ':gallery' => safeJson($restaurant, 'gallery'),
         ':cuisines' => safeJson($restaurant, 'cuisines'),
-        ':delivery' => !empty($restaurant['delivery']) ? 1 : 0
+        ':contact_info' => safeJson($restaurant, key: 'contact_info'),
+        ':reservations' => safeJson($restaurant, key: 'reservations'),
+        ':delivery' => !empty($restaurant['delivery'])? 1 : 0
     ]);
 
     echo json_encode(["success" => true]);

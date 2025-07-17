@@ -121,7 +121,9 @@ try {
         "status" => $row["status"] ?? null,
         "gallery" => $row["gallery"] ?? [],
         "cuisines" => $row["cuisines"] ?? [],
-        "delivery" => $row["delivery"] ?? false
+        "contact_info" => $restaurant["contact_info"] ?? [],
+        "reservations" => $restaurant["reservations"] ?? [],
+        "delivery" => (bool) $row["delivery"]
     ];
 
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
