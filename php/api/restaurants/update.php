@@ -2,6 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -17,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 require_once '../db.php';
 require_once '../auth.php';
 
+// Parse Authorization header
 $headers = getallheaders();
 $authorizationHeader = '';
 foreach ($headers as $key => $value) {
@@ -47,13 +49,11 @@ if (!$restaurant || !isset($restaurant['id'])) {
     exit;
 }
 
-function safe($array, $key, $default = null)
-{
+function safe($array, $key, $default = null) {
     return isset($array[$key]) && $array[$key] !== '' ? $array[$key] : $default;
 }
 
-function safeJson($array, $key)
-{
+function safeJson($array, $key) {
     return json_encode($array[$key] ?? []);
 }
 
@@ -91,7 +91,8 @@ try {
         gallery = :gallery,
         cuisines = :cuisines,
         delivery = :delivery,
-        contact_info = :contact_info ,reservations = :reservations,
+        contact_info = :contact_info,
+        reservations = :reservations
         WHERE id = :id");
 
     $stmt->execute([
@@ -127,9 +128,9 @@ try {
         ':status' => safe($restaurant, 'status'),
         ':gallery' => safeJson($restaurant, 'gallery'),
         ':cuisines' => safeJson($restaurant, 'cuisines'),
-        ':contact_info' => safeJson($restaurant, key: 'contact_info'),
-        ':reservations' => safeJson($restaurant, key: 'reservations'),
-        ':delivery' => !empty($restaurant['delivery'])? 1 : 0
+        ':contact_info' => safeJson($restaurant, 'contact_info'),
+        ':reservations' => safeJson($restaurant, 'reservations'),
+        ':delivery' => !empty($restaurant['delivery']) ? 1 : 0
     ]);
 
     echo json_encode(["success" => true]);
