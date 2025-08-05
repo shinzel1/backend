@@ -4,7 +4,7 @@ session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
-    $slug = $_POST['slug'] ?? '';
+    $slug = strtolower(preg_replace('/\s+/', '-', $_POST['slug']))  ?? '';
     $author = $_POST['author'] ?? '';
     $summary = $_POST['summary'] ?? '';
     $content = $_POST['content'] ?? '';
