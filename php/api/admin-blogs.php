@@ -33,9 +33,6 @@ function safeOutput($value) {
         th, td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
         th { background: #f0f0f0; }
         img.thumb { max-width: 100px; max-height: 80px; object-fit: cover; border-radius: 5px; }
-      
-        a.button:hover { background: #0056b3; }
-        .actions a { margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -79,7 +76,7 @@ function safeOutput($value) {
                     <td><?= safeOutput($blog['created_at']) ?></td>
                     <td class="actions">
                         <a href="edit-blog.php?id=<?= $blog['id'] ?>" class="button">Edit</a>
-                        <a href="delete-blog.php?id=<?= $blog['id'] ?>" class="button" style="background:#dc3545;" onclick="return confirm('Delete this blog?')">Delete</a>
+                        <a href="delete-blog.php?id=<?= $blog['id'] ?>" class="button"  onclick="return confirm('Delete this blog?')">Delete</a>
                     </td>
                 </tr>
             <?php endforeach ?>
