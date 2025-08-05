@@ -33,10 +33,7 @@ function safeOutput($value) {
         th, td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
         th { background: #f0f0f0; }
         img.thumb { max-width: 100px; max-height: 80px; object-fit: cover; border-radius: 5px; }
-        a.button {
-            background: #007bff; color: white; padding: 6px 10px;
-            text-decoration: none; border-radius: 4px;
-        }
+      
         a.button:hover { background: #0056b3; }
         .actions a { margin-right: 10px; }
     </style>
