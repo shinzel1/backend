@@ -29,7 +29,7 @@ function safeOutput($value) {
     <title>Admin - Blog List</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; background: #fff; }
+        table { border-collapse: collapse; background: #fff; }
         th, td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
         th { background: #f0f0f0; }
         img.thumb { max-width: 100px; max-height: 80px; object-fit: cover; border-radius: 5px; }
@@ -58,7 +58,7 @@ function safeOutput($value) {
                 <th>Slug</th>
                 <th>Author</th>
                 <th>Summary</th>
-                <th>Tags</th>
+                <!-- <th>Tags</th> -->
                 <th>Created</th>
                 <th>Actions</th>
             </tr>
@@ -78,7 +78,7 @@ function safeOutput($value) {
                     <td><?= safeOutput($blog['slug']) ?></td>
                     <td><?= safeOutput($blog['author']) ?></td>
                     <td><?= safeOutput($blog['summary']) ?></td>
-                    <td><?= safeOutput($blog['tags']) ?></td>
+                    <!-- <td><?= safeOutput($blog['tags']) ?></td> -->
                     <td><?= safeOutput($blog['created_at']) ?></td>
                     <td class="actions">
                         <a href="edit-blog.php?id=<?= $blog['id'] ?>" class="button">Edit</a>
