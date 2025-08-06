@@ -60,7 +60,7 @@ try {
         reasons_to_visit, tips_for_visitors,
         location_details, additional_info, chef_recommendations, event_hosting, nutritional_breakdown, rating,
         category, tags, locationUrl, image, menuImage, signature_cocktails,
-        status, gallery, cuisines,contact_info,reservations delivery
+        status, gallery, cuisines,contact_info,reservations ,delivery
     ) VALUES (
         :name, :city, :restaurantOrCafe, :title, :location, :overview, :shortDescription,
         :ambiance_description, :ambiance_features,
@@ -91,7 +91,7 @@ try {
         ':tips_for_visitors' => safeJson($restaurant, 'tips_for_visitors'),
         ':location_details' => safeJson($restaurant, 'location_details'),
         ':additional_info' => safeJson($restaurant, 'additional_info'),
-        ':chef_recommendations' => safeJson($restaurant, key: 'chef_recommendations'),
+        ':chef_recommendations' => safeJson($restaurant,  'chef_recommendations'),
         ':event_hosting' => safeJson($restaurant, 'event_hosting'),
         ':nutritional_breakdown' => safeJson($restaurant, 'nutritional_breakdown'),
         ':rating' => safe($restaurant, 'rating'),
@@ -104,8 +104,8 @@ try {
         ':status' => safe($restaurant, 'status'),
         ':gallery' => safeJson($restaurant, 'gallery'),
         ':cuisines' => safeJson($restaurant, 'cuisines'),
-        ':contact_info' => safeJson($restaurant, key: 'contact_info'),
-        ':reservations' => safeJson($restaurant, key: 'reservations'),
+        ':contact_info' => safeJson($restaurant, 'contact_info'),
+        ':reservations' => safeJson($restaurant,  'reservations'),
         ':delivery' => !empty($restaurant['delivery']) ? 1 : 0
     ]);
 
