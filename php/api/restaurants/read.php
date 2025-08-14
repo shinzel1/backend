@@ -69,7 +69,9 @@ try {
         'nutritional_breakdown',
         'signature_cocktails',
         'gallery',
-        'cuisines'
+        'cuisines',
+        'contact_info',
+        'reservations'
     ];
 
     foreach ($jsonFields as $field) {
