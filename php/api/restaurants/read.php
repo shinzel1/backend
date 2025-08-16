@@ -123,8 +123,8 @@ try {
         "status" => $row["status"] ?? null,
         "gallery" => $row["gallery"] ?? [],
         "cuisines" => $row["cuisines"] ?? [],
-        "contact_info" => $restaurant["contact_info"] ?? [],
-        "reservations" => $restaurant["reservations"] ?? [],
+        "contact_info" => $row["contact_info"] ?? [],
+        "reservations" => $row["reservations"] ?? [],
         "delivery" => (bool) $row["delivery"]
     ];
 
