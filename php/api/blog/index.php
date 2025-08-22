@@ -4,12 +4,12 @@ ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: admin-login.php');
-    exit;
-}
+// if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+//     header('Location: admin-login.php');
+//     exit;
+// }
 
-require_once __DIR__ . '/db.php';
+require_once '../db.php';
 
 try {
     $stmt = $pdo->query("SELECT id, title, slug, author, summary, tags, cover_image, created_at FROM blogs ORDER BY id DESC");
