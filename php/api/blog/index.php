@@ -4,10 +4,10 @@ ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-// if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-//     header('Location: admin-login.php');
-//     exit;
-// }
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: admin-login.php');
+    exit;
+}
 
 require_once '../db.php';
 
