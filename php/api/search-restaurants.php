@@ -28,7 +28,8 @@ if ($query) {
     $words = preg_split('/\s+/', $query);
     foreach ($words as $index => $word) {
         $key = ":word$index";
-        $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
+        // $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
+        $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key)";
         $params[$key] = '%' . strtolower($word) . '%';
     }
 }
