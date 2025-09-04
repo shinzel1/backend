@@ -1,7 +1,10 @@
 <?php
 require_once '../db.php';
 session_start();
-
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: admin-login.php');
+    exit;
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
     $slug = strtolower(preg_replace('/\s+/', '-', $_POST['slug'])) ?? '';

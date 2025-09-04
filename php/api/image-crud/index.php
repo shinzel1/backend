@@ -1,6 +1,10 @@
 <?php
 require_once '../db.php';
-
+session_start();
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: admin-login.php');
+    exit;
+}
 // Helper: make absolute URL from referrer/domain + relative path
 function make_absolute_url(string $path): string {
     if (preg_match('~^https?://~i', $path)) return $path;

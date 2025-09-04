@@ -1,6 +1,10 @@
 <?php
 require_once '../db.php';
-
+session_start();
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: admin-login.php');
+    exit;
+}
 $id = intval($_GET['id'] ?? 0);
 if ($id <= 0) {
     die("Invalid image ID");

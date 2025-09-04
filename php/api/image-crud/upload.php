@@ -1,6 +1,10 @@
 <?php
 require_once '../db.php';
-
+session_start();
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header('Location: admin-login.php');
+    exit;
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
     $entityType = $_POST['entity_type'];   // restaurant / blog / recipe
     $entityId = intval($_POST['entity_id']);
