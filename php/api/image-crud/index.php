@@ -3,16 +3,11 @@ require_once '../db.php';
 
 // Helper: make absolute URL from referrer/domain + relative path
 function make_absolute_url(string $path): string {
-    // If already absolute, return as-is
-    if (preg_match('~^https?://~i', $path)) {
-        return $path;
-    }
+    if (preg_match('~^https?://~i', $path)) return $path;
 
-    // Prefer HTTP_REFERER to keep exact base path the user came from (if present)
     $ref = $_SERVER['HTTP_REFERER'] ?? '';
     if (!empty($ref)) {
         $p = parse_url($ref);
-        // Build base: scheme://host[:port]/dir-of-referrer/
         $scheme = $p['scheme'] ?? ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http');
         $host   = $p['host'] ?? $_SERVER['HTTP_HOST'];
         $port   = isset($p['port']) ? ':' . $p['port'] : '';
@@ -21,7 +16,6 @@ function make_absolute_url(string $path): string {
         return $base . ltrim($path, '/');
     }
 
-    // Fallback: use current script directory
     $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
     $host   = $_SERVER['HTTP_HOST'];
     $dir    = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
@@ -29,8 +23,28 @@ function make_absolute_url(string $path): string {
     return $base . ltrim($path, '/');
 }
 
-// Fetch images (single file path in `filepath`)
-$stmt = $pdo->query("SELECT * FROM images ORDER BY id DESC");
+// Fetch images with entity mapping
+$sql = "
+    SELECT i.id, i.filename, i.filepath, i.uploaded_at,
+           'restaurant' AS entity_type, r.id AS entity_id, r.name AS entity_name, ri.type AS image_type
+      FROM images i
+      JOIN restaurant_images ri ON i.id = ri.image_id
+      JOIN restaurants r ON ri.restaurant_id = r.id
+    UNION ALL
+    SELECT i.id, i.filename, i.filepath, i.uploaded_at,
+           'blog' AS entity_type, b.id AS entity_id, b.title AS entity_name, bi.type AS image_type
+      FROM images i
+      JOIN blog_images bi ON i.id = bi.image_id
+      JOIN blogs b ON bi.blog_id = b.id
+    UNION ALL
+    SELECT i.id, i.filename, i.filepath, i.uploaded_at,
+           'recipe' AS entity_type, rc.id AS entity_id, rc.title AS entity_name, ri.type AS image_type
+      FROM images i
+      JOIN recipe_images ri ON i.id = ri.image_id
+      JOIN recipes rc ON ri.recipe_id = rc.id
+    ORDER BY id DESC
+";
+$stmt = $pdo->query($sql);
 $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -45,6 +59,15 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 alert("Copied: " + text);
             });
         }
+
+        function filterTable() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let rows = document.querySelectorAll("#imagesTable tbody tr");
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(input) ? "" : "none";
+            });
+        }
     </script>
 </head>
 <body class="bg-light">
@@ -54,21 +77,27 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <a href="upload.php" class="btn btn-primary">+ Upload New Image</a>
     </div>
 
-    <table class="table table-bordered table-hover align-middle shadow-sm bg-white">
+    <!-- Search -->
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search by filename, entity, or type..." onkeyup="filterTable()">
+    </div>
+
+    <table id="imagesTable" class="table table-bordered table-hover align-middle shadow-sm bg-white">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
                 <th>Thumbnail</th>
                 <th>File Name</th>
                 <th>File URL</th>
-                <th>Referrer</th>
+                <th>Entity</th>
+                <th>Type</th>
+                <th>Uploaded At</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
         <?php foreach ($images as $img): 
-            $fullUrl  = make_absolute_url($img['filepath']);
-            $referrer = $_SERVER['HTTP_REFERER'] ?? 'N/A';
+            $fullUrl = make_absolute_url($img['filepath']);
         ?>
             <tr>
                 <td><?= (int)$img['id'] ?></td>
@@ -80,7 +109,12 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <a href="<?= htmlspecialchars($fullUrl) ?>" target="_blank"><?= htmlspecialchars($fullUrl) ?></a>
                     <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('<?= htmlspecialchars($fullUrl, ENT_QUOTES) ?>')">Copy</button>
                 </td>
-                <td><span class="text-muted small"><?= htmlspecialchars($referrer) ?></span></td>
+                <td>
+                    <span class="badge bg-info text-dark"><?= htmlspecialchars($img['entity_type']) ?></span><br>
+                    <?= htmlspecialchars($img['entity_name']) ?> (ID: <?= (int)$img['entity_id'] ?>)
+                </td>
+                <td><span class="badge bg-secondary"><?= htmlspecialchars($img['image_type']) ?></span></td>
+                <td><?= htmlspecialchars($img['uploaded_at']) ?></td>
                 <td>
                     <a href="edit.php?id=<?= (int)$img['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
                     <a href="delete.php?id=<?= (int)$img['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this image?');">Delete</a>
