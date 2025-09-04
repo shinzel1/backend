@@ -79,6 +79,14 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
             color: #999;
             font-style: italic;
         }
+        
+    </style>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
+        table { border-collapse: collapse; background: #fff; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
+        th { background: #f0f0f0; }
+        img.thumb { max-width: 100px; max-height: 80px; object-fit: cover; border-radius: 5px; }
     </style>
 </head>
 
