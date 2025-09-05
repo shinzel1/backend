@@ -1,4 +1,4 @@
-<?php
+<?php 
 require_once '../db.php';
 
 $id = $_GET['id'];
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'description' => $_POST['description'],
         'slug' => $_POST['slug'],
         'ingredients' => json_encode(explode("\n", $_POST['ingredients'])),
-        'instructions' => json_encode(explode("\n", $_POST['instructions'])),
+        'instructions' => $_POST['instructions'], // store raw HTML instead of splitting lines
         'tags' => json_encode(explode(",", $_POST['tags'])),
         'recipe_category' => $_POST['recipe_category'],
         'recipe_cuisine' => $_POST['recipe_cuisine'],
@@ -51,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Edit Recipe</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CKEditor 5 CDN -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
 </head>
 <body class="bg-light">
 
@@ -89,8 +91,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="col-12">
-                            <label class="form-label">Instructions (one step per line)</label>
-                            <textarea name="instructions" class="form-control" rows="4"><?= implode("\n", json_decode($recipe['instructions'], true) ?? []) ?></textarea>
+                            <label class="form-label">Instructions</label>
+                            <!-- CKEditor will enhance this textarea -->
+                            <textarea name="instructions" id="instructions" class="form-control" rows="6"><?= htmlspecialchars($recipe['instructions']) ?></textarea>
                         </div>
 
                         <div class="col-md-6">
@@ -163,6 +166,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </div>
+
+<!-- Initialize CKEditor -->
+<script>
+ClassicEditor
+    .create(document.querySelector('#instructions'))
+    .catch(error => {
+        console.error(error);
+    });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
