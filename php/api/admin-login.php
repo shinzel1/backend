@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($user && password_verify($password, $user['password_hash'])) {
         $_SESSION['admin_logged_in'] = true;
-        header('Location: show-data.php');
+        header('Location: restaurantz');
         exit;
     } else {
         $error = "Invalid credentials.";

@@ -99,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
 </head>
 
 <body class="bg-light">
+    <?php require_once '../navbar/navbar.php'; ?>
     <div class="container mt-5">
         <h2>Upload Image</h2>
         <form action="" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">

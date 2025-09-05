@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header('Location: admin-login.php');
@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Add Offer</title>
@@ -47,86 +48,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
+
 <body class="bg-light">
-<div class="container mt-5">
-    <h2 class="mb-4">Add New Offer</h2>
-    <form method="post" class="card p-4 shadow-sm bg-white">
+    <?php require_once '../navbar/navbar.php'; ?>
 
-        <!-- Restaurant Multi-Select -->
-        <div class="mb-3">
-            <label class="form-label">Select Restaurants (Optional)</label>
-            <select name="restaurant_ids[]" id="restaurant_ids" class="form-control" multiple></select>
-            <div class="form-text">Leave empty to create a <strong>general offer</strong> (applies site-wide).</div>
-        </div>
+    <div class="container mt-5">
+        <h2 class="mb-4">Add New Offer</h2>
+        <form method="post" class="card p-4 shadow-sm bg-white">
 
-        <script>
-            $(document).ready(function () {
-                $('#restaurant_ids').select2({
-                    placeholder: "Search restaurants...",
-                    ajax: {
-                        url: '../image-crud/fetch_entities.php',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return { q: params.term, type: 'restaurant' };
-                        },
-                        processResults: function (data) {
-                            return { results: data };
-                        },
-                        cache: true
-                    }
+            <!-- Restaurant Multi-Select -->
+            <div class="mb-3">
+                <label class="form-label">Select Restaurants (Optional)</label>
+                <select name="restaurant_ids[]" id="restaurant_ids" class="form-control" multiple></select>
+                <div class="form-text">Leave empty to create a <strong>general offer</strong> (applies site-wide).</div>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#restaurant_ids').select2({
+                        placeholder: "Search restaurants...",
+                        ajax: {
+                            url: '../image-crud/fetch_entities.php',
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return { q: params.term, type: 'restaurant' };
+                            },
+                            processResults: function (data) {
+                                return { results: data };
+                            },
+                            cache: true
+                        }
+                    });
                 });
-            });
-        </script>
+            </script>
 
-        <div class="mb-3">
-            <label class="form-label">Offer Title</label>
-            <input type="text" name="title" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control" rows="3"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Coupon Code</label>
-            <input type="text" name="code" class="form-control">
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Discount Type</label>
-                <select name="discount_type" class="form-control">
-                    <option value="percentage">Percentage</option>
-                    <option value="flat">Flat</option>
-                </select>
+            <div class="mb-3">
+                <label class="form-label">Offer Title</label>
+                <input type="text" name="title" class="form-control" required>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Discount Value</label>
-                <input type="number" step="0.01" name="discount_value" class="form-control" required>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Start Date</label>
-                <input type="date" name="start_date" class="form-control" required>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3"></textarea>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">End Date</label>
-                <input type="date" name="end_date" class="form-control" required>
+
+            <div class="mb-3">
+                <label class="form-label">Coupon Code</label>
+                <input type="text" name="code" class="form-control">
             </div>
-        </div>
 
-        <div class="form-check mb-3">
-            <input type="checkbox" name="is_active" class="form-check-input" id="activeCheck" checked>
-            <label class="form-check-label" for="activeCheck">Active</label>
-        </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Discount Type</label>
+                    <select name="discount_type" class="form-control">
+                        <option value="percentage">Percentage</option>
+                        <option value="flat">Flat</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Discount Value</label>
+                    <input type="number" step="0.01" name="discount_value" class="form-control" required>
+                </div>
+            </div>
 
-        <button type="submit" class="btn btn-primary">Save Offer</button>
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
-    </form>
-</div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <input type="checkbox" name="is_active" class="form-check-input" id="activeCheck" checked>
+                <label class="form-check-label" for="activeCheck">Active</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Offer</button>
+            <a href="index.php" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </body>
+
 </html>

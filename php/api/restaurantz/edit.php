@@ -82,6 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body class="bg-light">
+        <?php require_once '../navbar/navbar.php'; ?>
+
     <div class="container mt-5">
         <h2>Edit Restaurant: <?= htmlspecialchars($restaurant['name']) ?></h2>
 
@@ -126,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             value="<?= htmlspecialchars($restaurant['location']) ?>">
                     </div>
                     <div class="mb-3"><label>Overview</label>
-                        <textarea  rows="6" name="overview"
+                        <textarea rows="6" name="overview"
                             class="form-control"><?= htmlspecialchars($restaurant['overview']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Short Description</label>
@@ -142,11 +144,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Ambiance -->
                 <div class="tab-pane fade" id="ambiance">
                     <div class="mb-3"><label>Ambiance Description</label>
-                        <textarea  rows="6" name="ambiance_description"
+                        <textarea rows="6" name="ambiance_description"
                             class="form-control"><?= htmlspecialchars($restaurant['ambiance_description']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Ambiance Features (JSON)</label>
-                        <textarea  rows="6" name="ambiance_features"
+                        <textarea rows="6" name="ambiance_features"
                             class="form-control"><?= htmlspecialchars($restaurant['ambiance_features']) ?></textarea>
                     </div>
                 </div>
@@ -154,23 +156,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Cuisine -->
                 <div class="tab-pane fade" id="cuisine">
                     <div class="mb-3"><label>Cuisine Description</label>
-                        <textarea  rows="6" name="cuisine_description"
+                        <textarea rows="6" name="cuisine_description"
                             class="form-control"><?= htmlspecialchars($restaurant['cuisine_description']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Cuisine Menu Sections (JSON)</label>
-                        <textarea  rows="6" name="cuisine_menu_sections"
+                        <textarea rows="6" name="cuisine_menu_sections"
                             class="form-control"><?= htmlspecialchars($restaurant['cuisine_menu_sections']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Must Try (JSON)</label>
-                        <textarea  rows="6" name="must_try"
+                        <textarea rows="6" name="must_try"
                             class="form-control"><?= htmlspecialchars($restaurant['must_try']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Chef Recommendations (JSON)</label>
-                        <textarea  rows="6" name="chef_recommendations"
+                        <textarea rows="6" name="chef_recommendations"
                             class="form-control"><?= htmlspecialchars($restaurant['chef_recommendations']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Signature Cocktails (JSON)</label>
-                        <textarea  rows="6" name="signature_cocktails"
+                        <textarea rows="6" name="signature_cocktails"
                             class="form-control"><?= htmlspecialchars($restaurant['signature_cocktails']) ?></textarea>
                     </div>
                 </div>
@@ -178,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Service -->
                 <div class="tab-pane fade" id="service">
                     <div class="mb-3"><label>Service Description</label>
-                        <textarea  rows="6" name="service_description"
+                        <textarea rows="6" name="service_description"
                             class="form-control"><?= htmlspecialchars($restaurant['service_description']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Service Style</label>
@@ -186,15 +188,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             value="<?= htmlspecialchars($restaurant['service_style']) ?>">
                     </div>
                     <div class="mb-3"><label>Reasons to Visit (JSON)</label>
-                        <textarea  rows="6" name="reasons_to_visit"
+                        <textarea rows="6" name="reasons_to_visit"
                             class="form-control"><?= htmlspecialchars($restaurant['reasons_to_visit']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Tips for Visitors (JSON)</label>
-                        <textarea  rows="6" name="tips_for_visitors"
+                        <textarea rows="6" name="tips_for_visitors"
                             class="form-control"><?= htmlspecialchars($restaurant['tips_for_visitors']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Event Hosting (JSON)</label>
-                        <textarea  rows="6" name="event_hosting"
+                        <textarea rows="6" name="event_hosting"
                             class="form-control"><?= htmlspecialchars($restaurant['event_hosting']) ?></textarea>
                     </div>
                 </div>
@@ -202,11 +204,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Location -->
                 <div class="tab-pane fade" id="location">
                     <div class="mb-3"><label>Location Details (JSON)</label>
-                        <textarea  rows="6" name="location_details"
+                        <textarea rows="6" name="location_details"
                             class="form-control"><?= htmlspecialchars($restaurant['location_details']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Additional Info (JSON)</label>
-                        <textarea  rows="6" name="additional_info"
+                        <textarea rows="6" name="additional_info"
                             class="form-control"><?= htmlspecialchars($restaurant['additional_info']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Location URL</label>
@@ -214,15 +216,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             value="<?= htmlspecialchars($restaurant['locationUrl']) ?>">
                     </div>
                     <div class="mb-3"><label>Category (JSON)</label>
-                        <textarea  rows="6" name="category"
+                        <textarea rows="6" name="category"
                             class="form-control"><?= htmlspecialchars($restaurant['category']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Cuisines (JSON)</label>
-                        <textarea  rows="6" name="cuisines"
+                        <textarea rows="6" name="cuisines"
                             class="form-control"><?= htmlspecialchars($restaurant['cuisines']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Tags (JSON)</label>
-                        <textarea  rows="6" name="tags"
+                        <textarea rows="6" name="tags"
                             class="form-control"><?= htmlspecialchars($restaurant['tags']) ?></textarea>
                     </div>
                 </div>
@@ -234,11 +236,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             value="<?= htmlspecialchars($restaurant['image']) ?>">
                     </div>
                     <div class="mb-3"><label>Gallery (JSON)</label>
-                        <textarea  rows="6" name="gallery"
+                        <textarea rows="6" name="gallery"
                             class="form-control"><?= htmlspecialchars($restaurant['gallery']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Menu Images (JSON)</label>
-                        <textarea  rows="6" name="menuImage"
+                        <textarea rows="6" name="menuImage"
                             class="form-control"><?= htmlspecialchars($restaurant['menuImage']) ?></textarea>
                     </div>
                 </div>
@@ -246,15 +248,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <!-- Other -->
                 <div class="tab-pane fade" id="other">
                     <div class="mb-3"><label>Contact Info (JSON)</label>
-                        <textarea  rows="6" name="contact_info"
+                        <textarea rows="6" name="contact_info"
                             class="form-control"><?= htmlspecialchars($restaurant['contact_info']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Reservations (JSON)</label>
-                        <textarea  rows="6" name="reservations"
+                        <textarea rows="6" name="reservations"
                             class="form-control"><?= htmlspecialchars($restaurant['reservations']) ?></textarea>
                     </div>
                     <div class="mb-3"><label>Nutritional Breakdown (JSON)</label>
-                        <textarea  rows="6" name="nutritional_breakdown"
+                        <textarea rows="6" name="nutritional_breakdown"
                             class="form-control"><?= htmlspecialchars($restaurant['nutritional_breakdown']) ?></textarea>
                     </div>
                     <div class="form-check mb-3">

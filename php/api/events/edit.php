@@ -66,6 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body class="bg-light">
+        <?php require_once '../navbar/navbar.php'; ?>
+
 <div class="container mt-5">
     <h2>Edit event</h2>
     <form method="post" class="card p-4 shadow-sm bg-white">

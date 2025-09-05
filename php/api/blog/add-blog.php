@@ -33,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body class="bg-light">
+    <?php require_once '../navbar/navbar.php'; ?>
+
     <div class="container mt-5">
         <h2 class="mb-4">Add New Blog</h2>
         <form method="post" class="card p-4 shadow-sm bg-white">

@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 isset($data['event_hosting']) ? json_encode($data['event_hosting']) : null,
                 isset($data['nutritional_breakdown']) ? json_encode($data['nutritional_breakdown']) : null,
                 isset($data['signature_cocktails']) ? json_encode($data['signature_cocktails']) : null,
-                isset($data['delivery']) ? (int)$data['delivery'] : 0,
+                isset($data['delivery']) ? (int) $data['delivery'] : 0,
                 isset($data['contact_info']) ? json_encode($data['contact_info']) : null,
                 isset($data['reservations']) ? json_encode($data['reservations']) : null
             ]);
@@ -82,33 +82,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Add Restaurant (JSON)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        textarea { font-family: monospace; }
+        textarea {
+            font-family: monospace;
+        }
     </style>
 </head>
+
 <body class="bg-light">
-<div class="container mt-5">
-    <h2>Add Restaurant (via JSON)</h2>
+    <?php require_once '../navbar/navbar.php'; ?>
 
-    <?php if ($error): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-    <?php elseif ($success): ?>
-        <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
+    <div class="container mt-5">
+        <h2>Add Restaurant (via JSON)</h2>
 
-    <form method="post" class="card p-4 shadow-sm bg-white">
-        <div class="mb-3">
-            <label class="form-label">Restaurant JSON</label>
-            <textarea name="restaurant_json" class="form-control" rows="25" required><?= isset($_POST['restaurant_json']) ? htmlspecialchars($_POST['restaurant_json']) : '' ?></textarea>
-            <small class="text-muted">Paste valid JSON structure here.</small>
-        </div>
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php elseif ($success): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
 
-        <button type="submit" class="btn btn-primary">Save Restaurant</button>
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
-    </form>
-</div>
+        <form method="post" class="card p-4 shadow-sm bg-white">
+            <div class="mb-3">
+                <label class="form-label">Restaurant JSON</label>
+                <textarea name="restaurant_json" class="form-control" rows="25"
+                    required><?= isset($_POST['restaurant_json']) ? htmlspecialchars($_POST['restaurant_json']) : '' ?></textarea>
+                <small class="text-muted">Paste valid JSON structure here.</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Restaurant</button>
+            <a href="index.php" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </body>
+
 </html>

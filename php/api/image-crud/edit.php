@@ -124,6 +124,8 @@ $fullUrl = make_absolute_url($image['filepath']);
     </style>
 </head>
 <body class="bg-light">
+        <?php require_once '../navbar/navbar.php'; ?>
+
 <div class="container mt-5">
     <h2>Edit Image</h2>
     <form action="" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">

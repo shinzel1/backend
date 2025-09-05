@@ -58,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Edit Offer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -65,94 +66,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-    <h2>Edit Offer</h2>
-    <form method="post" class="card p-4 shadow-sm bg-white">
 
-        <!-- Restaurant Multi-Select -->
-        <div class="mb-3">
-            <label class="form-label">Select Restaurants</label>
-            <select name="restaurant_ids[]" id="restaurant_ids" class="form-control" multiple>
-                <?php foreach ($selectedRestaurants as $rid): ?>
-                    <?php
+<body class="bg-light">
+    <?php require_once '../navbar/navbar.php'; ?>
+
+    <div class="container mt-5">
+        <h2>Edit Offer</h2>
+        <form method="post" class="card p-4 shadow-sm bg-white">
+
+            <!-- Restaurant Multi-Select -->
+            <div class="mb-3">
+                <label class="form-label">Select Restaurants</label>
+                <select name="restaurant_ids[]" id="restaurant_ids" class="form-control" multiple>
+                    <?php foreach ($selectedRestaurants as $rid): ?>
+                        <?php
                         $rStmt = $pdo->prepare("SELECT id, name FROM restaurants WHERE id = ?");
                         $rStmt->execute([$rid]);
                         $r = $rStmt->fetch(PDO::FETCH_ASSOC);
                         if ($r):
-                    ?>
-                        <option value="<?= $r['id'] ?>" selected><?= htmlspecialchars($r['name']) ?></option>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </select>
-        </div>
+                            ?>
+                            <option value="<?= $r['id'] ?>" selected><?= htmlspecialchars($r['name']) ?></option>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-        <script>
-            $(document).ready(function () {
-                $('#restaurant_ids').select2({
-                    placeholder: "Search restaurants...",
-                    ajax: {
-                        url: '../image-crud/fetch_entities.php',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return { q: params.term, type: 'restaurant' };
-                        },
-                        processResults: function (data) {
-                            return { results: data };
-                        },
-                        cache: true
-                    }
+            <script>
+                $(document).ready(function () {
+                    $('#restaurant_ids').select2({
+                        placeholder: "Search restaurants...",
+                        ajax: {
+                            url: '../image-crud/fetch_entities.php',
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return { q: params.term, type: 'restaurant' };
+                            },
+                            processResults: function (data) {
+                                return { results: data };
+                            },
+                            cache: true
+                        }
+                    });
                 });
-            });
-        </script>
+            </script>
 
-        <div class="mb-3">
-            <label class="form-label">Offer Title</label>
-            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($offer['title']) ?>" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Offer Title</label>
+                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($offer['title']) ?>"
+                    required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control"><?= htmlspecialchars($offer['description']) ?></textarea>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description"
+                    class="form-control"><?= htmlspecialchars($offer['description']) ?></textarea>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Coupon Code</label>
-            <input type="text" name="code" class="form-control" value="<?= htmlspecialchars($offer['code']) ?>">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Coupon Code</label>
+                <input type="text" name="code" class="form-control" value="<?= htmlspecialchars($offer['code']) ?>">
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Discount Type</label>
-            <select name="discount_type" class="form-control">
-                <option value="percentage" <?= $offer['discount_type'] === 'percentage' ? 'selected' : '' ?>>Percentage</option>
-                <option value="flat" <?= $offer['discount_type'] === 'flat' ? 'selected' : '' ?>>Flat</option>
-            </select>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Discount Type</label>
+                <select name="discount_type" class="form-control">
+                    <option value="percentage" <?= $offer['discount_type'] === 'percentage' ? 'selected' : '' ?>>Percentage
+                    </option>
+                    <option value="flat" <?= $offer['discount_type'] === 'flat' ? 'selected' : '' ?>>Flat</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Discount Value</label>
-            <input type="number" step="0.01" name="discount_value" class="form-control" value="<?= $offer['discount_value'] ?>" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Discount Value</label>
+                <input type="number" step="0.01" name="discount_value" class="form-control"
+                    value="<?= $offer['discount_value'] ?>" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Start Date</label>
-            <input type="date" name="start_date" class="form-control" value="<?= $offer['start_date'] ?>" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" value="<?= $offer['start_date'] ?>" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">End Date</label>
-            <input type="date" name="end_date" class="form-control" value="<?= $offer['end_date'] ?>" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" value="<?= $offer['end_date'] ?>" required>
+            </div>
 
-        <div class="form-check mb-3">
-            <input type="checkbox" name="is_active" class="form-check-input" id="activeCheck" <?= $offer['is_active'] ? 'checked' : '' ?>>
-            <label class="form-check-label" for="activeCheck">Active</label>
-        </div>
+            <div class="form-check mb-3">
+                <input type="checkbox" name="is_active" class="form-check-input" id="activeCheck" <?= $offer['is_active'] ? 'checked' : '' ?>>
+                <label class="form-check-label" for="activeCheck">Active</label>
+            </div>
 
-        <button type="submit" class="btn btn-primary">Update Offer</button>
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
-    </form>
-</div>
+            <button type="submit" class="btn btn-primary">Update Offer</button>
+            <a href="index.php" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </body>
+
 </html>

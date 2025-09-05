@@ -51,10 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 
     <!-- CKEditor 5 Classic CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/ckeditor5-build-classic-base64-upload-adapter@latest/build/ckeditor.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/ckeditor5-build-classic-base64-upload-adapter@latest/build/ckeditor.js"></script>
 </head>
 
 <body class="container py-4">
+    <?php require_once '../navbar/navbar.php'; ?>
 
     <h2 class="mb-4">Edit Blog #<?= htmlspecialchars($id) ?></h2>
 

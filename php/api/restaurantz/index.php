@@ -58,18 +58,43 @@ function safeOutput($value, $default = '—')
             color: #999;
             font-style: italic;
         }
-        
     </style>
     <style>
-        body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
-        table { border-collapse: collapse; background: #fff; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: top; }
-        th { background: #f0f0f0; }
-        img.thumb { max-width: 100px; max-height: 80px; object-fit: cover; border-radius: 5px; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            padding: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        img.thumb {
+            max-width: 100px;
+            max-height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
 <body class="bg-light">
+    <?php require_once '../navbar/navbar.php'; ?>
+
     <div class="container mt-5">
         <h2>Restaurants <a href="add.php" class="btn btn-success btn-sm">+ Add Restaurant</a></h2>
         <table class="table table-bordered table-striped mt-3">
@@ -86,7 +111,7 @@ function safeOutput($value, $default = '—')
             </thead>
             <tbody>
                 <?php foreach ($restaurants as $res): ?>
-                    
+
                     <tr>
                         <td><a href="edit.php?id=<?= safeOutput($res['id']) ?>"><?= safeOutput($res['id']) ?></a>
                         </td>

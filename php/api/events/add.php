@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Add Event</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -44,70 +45,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
+
 <body class="bg-light">
-<div class="container mt-5">
-    <h2>Add Event</h2>
-    <form method="post" class="card p-4 shadow-sm bg-white">
+    <?php require_once '../navbar/navbar.php'; ?>
 
-        <!-- Restaurant Multi-Select -->
-        <div class="mb-3">
-            <label class="form-label">Select Restaurants</label>
-            <select name="restaurant_ids[]" id="restaurant_ids" class="form-control" multiple></select>
-        </div>
+    <div class="container mt-5">
+        <h2>Add Event</h2>
+        <form method="post" class="card p-4 shadow-sm bg-white">
 
-        <script>
-            $(document).ready(function () {
-                $('#restaurant_ids').select2({
-                    placeholder: "Search restaurants...",
-                    ajax: {
-                        url: '../image-crud/fetch_entities.php',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return { q: params.term, type: 'restaurant' };
-                        },
-                        processResults: function (data) {
-                            return { results: data };
-                        },
-                        cache: true
-                    }
+            <!-- Restaurant Multi-Select -->
+            <div class="mb-3">
+                <label class="form-label">Select Restaurants</label>
+                <select name="restaurant_ids[]" id="restaurant_ids" class="form-control" multiple></select>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    $('#restaurant_ids').select2({
+                        placeholder: "Search restaurants...",
+                        ajax: {
+                            url: '../image-crud/fetch_entities.php',
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return { q: params.term, type: 'restaurant' };
+                            },
+                            processResults: function (data) {
+                                return { results: data };
+                            },
+                            cache: true
+                        }
+                    });
                 });
-            });
-        </script>
+            </script>
 
-        <div class="mb-3">
-            <label class="form-label">Event Title</label>
-            <input type="text" name="title" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Event Title</label>
+                <input type="text" name="title" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-control"></textarea>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control"></textarea>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Start Date</label>
-            <input type="date" name="start_date" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">End Date</label>
-            <input type="date" name="end_date" class="form-control" required>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Location</label>
-            <input type="text" name="location" class="form-control">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Location</label>
+                <input type="text" name="location" class="form-control">
+            </div>
 
-        <div class="form-check mb-3">
-            <input type="checkbox" name="is_active" class="form-check-input" id="activeCheck" checked>
-            <label class="form-check-label" for="activeCheck">Active</label>
-        </div>
+            <div class="form-check mb-3">
+                <input type="checkbox" name="is_active" class="form-check-input" id="activeCheck" checked>
+                <label class="form-check-label" for="activeCheck">Active</label>
+            </div>
 
-        <button type="submit" class="btn btn-primary">Add Event</button>
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
-    </form>
-</div>
+            <button type="submit" class="btn btn-primary">Add Event</button>
+            <a href="index.php" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
 </body>
+
 </html>
