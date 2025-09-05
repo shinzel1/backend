@@ -30,12 +30,6 @@ function safeOutput($value)
 <head>
     <title>Admin - Blog List</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f9f9f9;
-            padding: 20px;
-        }
-
         table {
             border-collapse: collapse;
             background: #fff;

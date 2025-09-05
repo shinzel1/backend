@@ -32,3 +32,9 @@
         </div>
     </div>
 </nav>
+<style>
+    body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+        }
+</style>
