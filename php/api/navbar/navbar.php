@@ -34,35 +34,36 @@
 </nav>
 <style>
     body {
-            font-family: Arial, sans-serif;
-            background: #f9f9f9;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background: #f9f9f9;
-        }
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+    }
 
-        table {
-            border-collapse: collapse;
-            background: #fff;
-        }
+    body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+    }
 
-        th,
-        td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-            vertical-align: top;
-        }
+    table {
+        border-collapse: collapse;
+        background: #fff;
+    }
 
-        th {
-            background: #f0f0f0;
-        }
+    th,
+    td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: left;
+        vertical-align: top;
+    }
 
-        img.thumb {
-            max-width: 100px;
-            max-height: 80px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
+    th {
+        background: #f0f0f0;
+    }
+
+    img.thumb {
+        max-width: 100px;
+        max-height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
 </style>
