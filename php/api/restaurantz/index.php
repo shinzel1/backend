@@ -113,7 +113,7 @@ function safeOutput($value, $default = '—')
                 <?php foreach ($restaurants as $res): ?>
 
                     <tr>
-                        <td><a href="edit.php?id=<?= safeOutput($res['id']) ?>"><?= safeOutput($res['id']) ?></a>
+                        <td><a href="edit.php?id=<?= safeOutput($res['id']) ?>" target="_blank"><?= safeOutput($res['id']) ?></a>
                         </td>
                         <td>
                             <?php if (!empty($res['image'])): ?>
