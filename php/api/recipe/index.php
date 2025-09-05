@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+        header('Location: ../admin-login.php');
+    exit;
+}
 require_once '../db.php';
 $stmt = $pdo->query("SELECT * FROM recipes ORDER BY created_at DESC");
 $recipes = $stmt->fetchAll();
