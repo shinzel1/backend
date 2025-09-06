@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ../admin-login.php');
+    header('Location: ../admin-login.php');
     exit;
 }
 require_once '../db.php';
@@ -20,15 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             $stmt = $pdo->prepare("INSERT INTO restaurants (
-                name, city, restaurantOrCafe, title, location, overview, shortDescription,
-                ambiance_description, ambiance_features, cuisine_description, cuisine_menu_sections,
-                must_try, service_description, service_style, reasons_to_visit, tips_for_visitors,
-                location_details, additional_info, rating, status, category, cuisines, tags,
-                locationUrl, image, gallery, menuImage, chef_recommendations, event_hosting,
-                nutritional_breakdown, signature_cocktails, delivery, contact_info, reservations,
-                created_at
-            ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())");
-
+    name, city, restaurantOrCafe, title, location, overview, shortDescription,
+    ambiance_description, ambiance_features, cuisine_description, cuisine_menu_sections,
+    must_try, service_description, service_style, reasons_to_visit, tips_for_visitors,
+    location_details, additional_info, rating, status, category, cuisines, tags,
+    locationUrl, image, gallery, menuImage, chef_recommendations, event_hosting,
+    nutritional_breakdown, signature_cocktails, delivery, contact_info, reservations,
+    created_at
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())");
             $stmt->execute([
                 $data['name'] ?? null,
                 $data['city'] ?? null,
@@ -70,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 isset($data['contact_info']) ? json_encode($data['contact_info']) : null,
                 isset($data['reservations']) ? json_encode($data['reservations']) : null
             ]);
-
             $success = "Restaurant added successfully!";
         } catch (Exception $e) {
             $error = "Error inserting data: " . $e->getMessage();
