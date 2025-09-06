@@ -17,6 +17,17 @@ if (!$restaurant) {
 
 $error = "";
 $success = "";
+function ensureJson($value)
+{
+    $decoded = json_decode($value, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        return $value; // already valid JSON
+    }
+    // try to convert comma-separated input into JSON array
+    $parts = array_map('trim', explode(',', $value));
+    return json_encode($parts, JSON_UNESCAPED_UNICODE);
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -38,33 +49,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['overview'],
             $_POST['shortDescription'],
             $_POST['ambiance_description'],
-            $_POST['ambiance_features'],
+            ensureJson($_POST['ambiance_features']),
             $_POST['cuisine_description'],
-            $_POST['cuisine_menu_sections'],
-            $_POST['must_try'],
+            ensureJson($_POST['cuisine_menu_sections']),
+            ensureJson($_POST['must_try']),
             $_POST['service_description'],
             $_POST['service_style'],
-            $_POST['reasons_to_visit'],
-            $_POST['tips_for_visitors'],
-            $_POST['location_details'],
-            $_POST['additional_info'],
+            ensureJson($_POST['reasons_to_visit']),
+            ensureJson($_POST['tips_for_visitors']),
+            ensureJson($_POST['location_details']),
+            ensureJson($_POST['additional_info']),
             $_POST['rating'],
-            $_POST['category'],
-            $_POST['cuisines'],
-            $_POST['tags'],
+            ensureJson($_POST['category']),
+            ensureJson($_POST['cuisines']),   // ✅ fixes your error
+            ensureJson($_POST['tags']),
             $_POST['locationUrl'],
             $_POST['image'],
-            $_POST['gallery'],
-            $_POST['menuImage'],
-            $_POST['chef_recommendations'],
-            $_POST['event_hosting'],
-            $_POST['nutritional_breakdown'],
-            $_POST['signature_cocktails'],
+            ensureJson($_POST['gallery']),
+            ensureJson($_POST['menuImage']),
+            ensureJson($_POST['chef_recommendations']),
+            ensureJson($_POST['event_hosting']),
+            ensureJson($_POST['nutritional_breakdown']),
+            ensureJson($_POST['signature_cocktails']),
             isset($_POST['delivery']) ? 1 : 0,
-            $_POST['contact_info'],
-            $_POST['reservations'],
+            ensureJson($_POST['contact_info']),
+            ensureJson($_POST['reservations']),
             $id
         ]);
+
 
         $success = "Restaurant updated successfully!";
     } catch (Exception $e) {
@@ -82,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body class="bg-light">
-        <?php require_once '../navbar/navbar.php'; ?>
+    <?php require_once '../navbar/navbar.php'; ?>
 
     <div class="container mt-5">
         <h2>Edit Restaurant: <?= htmlspecialchars($restaurant['name']) ?></h2>
