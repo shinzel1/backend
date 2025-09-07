@@ -1,13 +1,13 @@
 <?php
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ../admin-login.php');
+    header('Location: ../admin-login.php');
 
     exit;
 }
 require_once '../db.php';
 
-$stmt = $pdo->query("SELECT id,title, name, city, location, status, rating ,image
+$stmt = $pdo->query("SELECT id,title, name, city, location, status, rating,category ,image
                      FROM restaurants ORDER BY created_at DESC");
 $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 function safeOutput($value, $default = '—')
@@ -76,6 +76,7 @@ function safeOutput($value, $default = '—')
                     <th>Title</th>
                     <th>City</th>
                     <th>Location</th>
+                    <th>category</th>
                     <th>Rating</th>
                 </tr>
             </thead>
@@ -83,7 +84,8 @@ function safeOutput($value, $default = '—')
                 <?php foreach ($restaurants as $res): ?>
 
                     <tr>
-                        <td><a href="edit.php?id=<?= safeOutput($res['id']) ?>" target="_blank"><?= safeOutput($res['id']) ?></a>
+                        <td><a href="edit.php?id=<?= safeOutput($res['id']) ?>"
+                                target="_blank"><?= safeOutput($res['id']) ?></a>
                         </td>
                         <td>
                             <?php if (!empty($res['image'])): ?>
@@ -96,6 +98,7 @@ function safeOutput($value, $default = '—')
                         <td><?= safeOutput($res['title']) ?></td>
                         <td><?= safeOutput($res['city']) ?></td>
                         <td><?= safeOutput($res['location']) ?></td>
+                        <td><?= safeOutput($res['category']) ?></td>
                         <td><?= safeOutput($res['rating']) ?></td>
                     </tr>
                 <?php endforeach ?>
