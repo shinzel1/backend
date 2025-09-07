@@ -64,9 +64,10 @@ function safeOutput($value, $default = '—')
 
 <body class="bg-light">
     <?php require_once '../navbar/navbar.php'; ?>
-
     <div class="p-5">
         <h2>Restaurants <a href="add.php" class="btn btn-success btn-sm">+ Add Restaurant</a></h2>
+
+
         <table class="table table-bordered table-striped mt-3">
             <thead>
                 <tr>
