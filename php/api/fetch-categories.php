@@ -3,6 +3,8 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 ini_set('display_errors', 1);
 ini_set('log_errors', 1);
+error_log(print_r(getallheaders(), true));
+error_log(print_r($_SERVER, true));
 error_reporting(E_ALL);
 
 require_once './db.php';
