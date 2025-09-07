@@ -15,50 +15,16 @@ try {
     /**
      * 🔐 Get Authorization header reliably (Apache, Nginx, PHP built-in)
      */
-    // function getAuthorizationHeader() {
-    //     $headers = [];
+    require_once './db.php';
+    require_once './auth.php';
 
-    //     // Prefer getallheaders()
-    //     if (function_exists('getallheaders')) {
-    //         $headers = getallheaders();
-    //     } elseif (function_exists('apache_request_headers')) {
-    //         $headers = apache_request_headers();
-    //     }
-
-    //     $headers = array_change_key_case($headers, CASE_LOWER);
-
-    //     // Check common sources
-    //     if (!empty($headers['authorization'])) {
-    //         return trim($headers['authorization']);
-    //     }
-    //     if (isset($_SERVER['HTTP_AUTHORIZATION'])) { 
-    //         return trim($_SERVER['HTTP_AUTHORIZATION']);
-    //     }
-    //     if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-    //         return trim($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
-    //     }
-
-    //     return null;
-    // }
-
-    // $authorizationHeader = getAuthorizationHeader();
-
-    // if (!$authorizationHeader) {
-    //     http_response_code(401);
-    //     echo json_encode(["error" => "Missing Authorization token"]);
-    //     exit;
-    // }
-
-    // Extract token (Bearer <token>)
-    // $token = preg_replace('/^Bearer\s+/i', '', $authorizationHeader);
-
-    // // Verify token
-    // $user = verifyJWT($token);
-    // if (!$user) {
-    //     http_response_code(403);
-    //     echo json_encode(["error" => "Invalid or expired token"]);
-    //     exit;
-    // }
+    // ✅ Authorization token check (optional)
+    $headers = getallheaders();
+    if (isset($headers['Authorization'])) {
+        $authHeader = $headers['Authorization'];
+        $token = str_replace('Bearer ', '', $authHeader);
+        $user = verifyJWT($token);
+    }
 
     // ✅ Fetch categories
     try {
