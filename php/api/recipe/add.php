@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'title' => $_POST['title'],
         'description' => $_POST['description'],
-        'slug' => $_POST['slug'],
+        'slug' => strtolower(preg_replace('/\s+/', '-', $_POST['slug'])),
         'ingredients' => json_encode(explode("\n", $_POST['ingredients'])), 
         // now storing instructions as plain HTML (not line breaks)
         'instructions' => $_POST['instructions'],

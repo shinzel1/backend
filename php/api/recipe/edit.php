@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'id' => $id,
         'title' => $_POST['title'],
         'description' => $_POST['description'],
-        'slug' => $_POST['slug'],
+        'slug' => strtolower(preg_replace('/\s+/', '-', $_POST['slug'])),
         'ingredients' => json_encode(explode("\n", $_POST['ingredients'])),
         'instructions' => $_POST['instructions'], // store raw HTML instead of splitting lines
         'tags' => json_encode(explode(",", $_POST['tags'])),
