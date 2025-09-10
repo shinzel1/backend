@@ -26,17 +26,11 @@ try {
     $offers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!$offers) {
-        echo json_encode([
-            "restaurant_id" => (int)$restaurantId,
-            "offers" => []
-        ]);
+        echo json_encode([]);
         exit;
     }
 
-    echo json_encode([
-        "restaurant_id" => (int)$restaurantId,
-        "offers" => $offers
-    ], JSON_PRETTY_PRINT);
+    echo json_encode($offers);
 
 } catch (Exception $e) {
     http_response_code(500);
