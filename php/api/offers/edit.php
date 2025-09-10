@@ -146,12 +146,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="mb-3">
                 <label class="form-label">Start Date</label>
-                <input type="date" name="start_date" class="form-control" value="<?= $offer['start_date'] ?>" required>
+                <input type="date" name="start_date" class="form-control" value="<?= $offer['start_date'] ?>">
             </div>
 
             <div class="mb-3">
                 <label class="form-label">End Date</label>
-                <input type="date" name="end_date" class="form-control" value="<?= $offer['end_date'] ?>" required>
+                <input type="date" name="end_date" class="form-control" value="<?= $offer['end_date'] ?>">
             </div>
 
             <div class="form-check mb-3">
