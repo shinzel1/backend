@@ -116,11 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Start Date</label>
-                    <input type="date" name="start_date" class="form-control" required>
+                    <input type="date" name="start_date" class="form-control">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">End Date</label>
-                    <input type="date" name="end_date" class="form-control" required>
+                    <input type="date" name="end_date" class="form-control">
                 </div>
             </div>
 
