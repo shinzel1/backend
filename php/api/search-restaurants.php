@@ -23,18 +23,48 @@ $category = strtolower(trim($input['category'] ?? 'all'));
 $params = [];
 $whereClauses = [];
 
+function fetchAndFilter($pdo, $table, $searchTerm, $nameField = 'name') {
+    $stmt = $pdo->query("SELECT * FROM $table");
+    $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $matchedByName = [];
+    $matchedByFull = [];
+
+    foreach ($all as $row) {
+        $rowStr = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $name = strtolower($row[$nameField] ?? '');
+
+        if (strpos($name, $searchTerm) !== false) {
+            $matchedByName[] = $row;
+        }
+        if (strpos(strtolower($rowStr), $searchTerm) !== false) {
+            $matchedByFull[] = $row;
+        }
+    }
+
+    // Merge and filter unique
+    $combined = array_merge($matchedByName, $matchedByFull);
+    $unique = array_values(array_reduce($combined, function ($carry, $item) {
+        $hash = md5(json_encode($item));
+        $carry[$hash] = $item;
+        return $carry;
+    }, []));
+
+    return $unique;
+}
+
+
 // ✅ Case 1: query is present → normal word-based matching
 if ($query) {
     $words = preg_split('/\s+/', $query);
     foreach ($words as $index => $word) {
         $key = ":word$index";
-        // $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
-        $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key)";
+        $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
+        // $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key)";
         $params[$key] = '%' . strtolower($word) . '%';
     }
 }
 
-// ✅ Case 2: query is empty, but category is specific → treat category like a keyword
 else if ($category !== 'all') {
     $key = ':categoryWord';
     $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
