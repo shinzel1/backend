@@ -20,8 +20,12 @@ $input = json_decode(file_get_contents("php://input"), true);
 $query = trim($input['query'] ?? '');
 $category = strtolower(trim($input['category'] ?? 'all'));
 
+if ($query == "") {
+    $query = $category;
+}
 // ✅ Utility function
-function fetchWithFilters($pdo, $table, $searchTerm, $nameField = 'name') {
+function fetchWithFilters($pdo, $table, $searchTerm, $nameField = 'name')
+{
     $stmt = $pdo->query("SELECT * FROM $table");
     $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
