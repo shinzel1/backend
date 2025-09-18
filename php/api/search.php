@@ -56,10 +56,12 @@ function fetchAndFilter($pdo, $table, $searchTerm, $nameField = 'name') {
 try {
     $filteredRestaurants = fetchAndFilter($pdo, 'restaurants', $searchTerm, 'name');
     $filteredBlogs = fetchAndFilter($pdo, 'blogs', $searchTerm, 'name');
+    $filteredRecipes = fetchAndFilter($pdo, 'recipes', $searchTerm, 'title');
 
     echo json_encode([
         "restaurants" => $filteredRestaurants,
-        "blogs" => $filteredBlogs
+        "blogs" => $filteredBlogs,
+        "recipes" => $filteredRecipes
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 } catch (PDOException $e) {
     http_response_code(500);
