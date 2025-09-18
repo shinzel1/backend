@@ -15,15 +15,13 @@ error_reporting(E_ALL);
 
 require_once './db.php';
 
-// ✅ Input handling
+// ✅ Input
 $input = json_decode(file_get_contents("php://input"), true);
 $query = trim($input['query'] ?? '');
 $category = strtolower(trim($input['category'] ?? 'all'));
 
-$params = [];
-$whereClauses = [];
-
-function fetchAndFilter($pdo, $table, $searchTerm, $nameField = 'name') {
+// ✅ Utility function
+function fetchWithFilters($pdo, $table, $searchTerm, $nameField = 'name') {
     $stmt = $pdo->query("SELECT * FROM $table");
     $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -34,15 +32,20 @@ function fetchAndFilter($pdo, $table, $searchTerm, $nameField = 'name') {
         $rowStr = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $name = strtolower($row[$nameField] ?? '');
 
-        if (strpos($name, $searchTerm) !== false) {
+        if ($searchTerm && strpos($name, $searchTerm) !== false) {
             $matchedByName[] = $row;
         }
-        if (strpos(strtolower($rowStr), $searchTerm) !== false) {
+        if ($searchTerm && strpos(strtolower($rowStr), $searchTerm) !== false) {
             $matchedByFull[] = $row;
+        }
+        if (!$searchTerm && $category !== 'all') {
+            if (strpos(strtolower($rowStr), $category) !== false) {
+                $matchedByFull[] = $row;
+            }
         }
     }
 
-    // Merge and filter unique
+    // Merge & unique
     $combined = array_merge($matchedByName, $matchedByFull);
     $unique = array_values(array_reduce($combined, function ($carry, $item) {
         $hash = md5(json_encode($item));
@@ -53,40 +56,10 @@ function fetchAndFilter($pdo, $table, $searchTerm, $nameField = 'name') {
     return $unique;
 }
 
-
-// ✅ Case 1: query is present → normal word-based matching
-if ($query) {
-    $words = preg_split('/\s+/', $query);
-    foreach ($words as $index => $word) {
-        $key = ":word$index";
-        $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
-        // $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key)";
-        $params[$key] = '%' . strtolower($word) . '%';
-    }
-}
-
-else if ($category !== 'all') {
-    $key = ':categoryWord';
-    $whereClauses[] = "(LOWER(name) LIKE $key OR LOWER(city) LIKE $key OR LOWER(title) LIKE $key OR LOWER(tags) LIKE $key OR LOWER(overview) LIKE $key)";
-    $params[$key] = '%' . $category . '%';
-}
-
-// ✅ Exit early if both query and category are empty/default
-if (empty($whereClauses)) {
-    http_response_code(400);
-    echo json_encode(["error" => "No search query or category provided."]);
-    exit;
-}
-
-// ✅ Build and run SQL
-$sql = "SELECT * FROM restaurants WHERE " . implode(" AND ", $whereClauses) . " ORDER BY rating DESC LIMIT 10";
-
 try {
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // ✅ Restaurants (with JSON field decoding)
+    $restaurants = fetchWithFilters($pdo, 'restaurants', strtolower($query), 'name');
 
-    // ✅ Decode JSON fields
     $jsonFields = [
         'ambiance_features',
         'cuisine_menu_sections',
@@ -99,16 +72,23 @@ try {
         'tags',
         'menuImage'
     ];
-    foreach ($results as &$row) {
+    foreach ($restaurants as &$row) {
         foreach ($jsonFields as $field) {
             if (isset($row[$field])) {
                 $decoded = json_decode($row[$field], true);
-                $row[$field] = json_last_error() === JSON_ERROR_NONE ? $decoded : null;
+                $row[$field] = json_last_error() === JSON_ERROR_NONE ? $decoded : $row[$field];
             }
         }
     }
+    $blogs = fetchWithFilters($pdo, 'blogs', strtolower($query), 'name');
+    $recipes = fetchWithFilters($pdo, 'recipes', strtolower($query), 'title');
 
-    echo json_encode($results, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo json_encode([
+        "restaurants" => $restaurants,
+        "blogs" => $blogs,
+        "recipes" => $recipes
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(["error" => "Database error", "message" => $e->getMessage()]);
