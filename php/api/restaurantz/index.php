@@ -14,6 +14,29 @@ function safeOutput($value, $default = '—')
 {
     return htmlspecialchars(!empty($value) ? $value : $default);
 }
+
+
+// Fetch all categories (stored as JSON/text)
+// $sql = "SELECT category FROM restaurants WHERE category IS NOT NULL";
+// $stmt = $pdo->query($sql);
+// $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+// $allCategories = [];
+
+// foreach ($rows as $row) {
+//     $decoded = json_decode($row, true);
+//     if (is_array($decoded)) {
+//         foreach ($decoded as $cat) {
+//             $allCategories[] = trim($cat);
+//         }
+//     }
+// }
+
+// // Remove duplicates & sort
+// $uniqueCategories = array_values(array_unique($allCategories));
+// sort($uniqueCategories);
+
+// echo json_encode($uniqueCategories, JSON_PRETTY_PRINT);
 ?>
 <!DOCTYPE html>
 <html>
