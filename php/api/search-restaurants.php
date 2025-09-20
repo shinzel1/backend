@@ -23,7 +23,6 @@ $category = strtolower(trim($input['category'] ?? 'all'));
 if ($query == "") {
     $query = $category;
 }
-
 // ✅ Utility function
 function fetchWithFilters($pdo, $table, $searchTerm, $nameField = 'name')
 {
@@ -85,14 +84,8 @@ try {
             }
         }
     }
-
     $blogs = fetchWithFilters($pdo, 'blogs', strtolower($query), 'name');
     $recipes = fetchWithFilters($pdo, 'recipes', strtolower($query), 'title');
-
-    // ✅ Limit results to 10
-    $restaurants = array_slice($restaurants, 0, 10);
-    $blogs = array_slice($blogs, 0, 10);
-    $recipes = array_slice($recipes, 0, 10);
 
     echo json_encode([
         "restaurants" => $restaurants,
