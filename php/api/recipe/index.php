@@ -33,6 +33,7 @@ $recipes = $stmt->fetchAll();
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Title</th>
+                            <th scope="col">Slug</th>
                             <th scope="col">Category</th>
                             <th scope="col">Cuisine</th>
                             <th scope="col" class="text-center">Actions</th>
@@ -44,6 +45,7 @@ $recipes = $stmt->fetchAll();
                                 <tr>
                                     <td><?= $r['id'] ?></td>
                                     <td><?= htmlspecialchars($r['title']) ?></td>
+                                    <td><?= htmlspecialchars($r['slug']) ?></td>
                                     <td><?= htmlspecialchars($r['recipe_category']) ?></td>
                                     <td><?= htmlspecialchars($r['recipe_cuisine']) ?></td>
                                     <td class="text-center">
