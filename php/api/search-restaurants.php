@@ -17,8 +17,8 @@ require_once './db.php';
 
 // ✅ Input
 $input = json_decode(file_get_contents("php://input"), true);
-$query = trim($input['query'] ?? '');
-$category = strtolower(preg_replace('-', ' ', trim($input['category'] ?? 'all')));
+$query = strtolower(trim($input['query'] ?? ''));
+$category = strtolower(trim($input['category'] ?? 'all'));
 if ($query == "") {
     $query = $category;
 }
