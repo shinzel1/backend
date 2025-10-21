@@ -64,7 +64,7 @@ try {
 
     // 🔗 Convert filepaths to absolute URLs
     foreach ($images as &$img) {
-        $img['filepath'] = make_absolute_url($img['filepath']);
+        $img['filepath'] = make_absolute_url('image-crud/'.$img['filepath']);
     }
 
     echo json_encode($images);

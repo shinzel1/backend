@@ -104,7 +104,7 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </thead>
         <tbody>
         <?php foreach ($images as $img): 
-            $fullUrl = make_absolute_url($img['filepath']);
+            $fullUrl = make_absolute_url('image-crud/'.$img['filepath']);
         ?>
             <tr>
                 <td><?= (int)$img['id'] ?></td>
