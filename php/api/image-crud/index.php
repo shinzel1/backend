@@ -2,16 +2,18 @@
 require_once '../db.php';
 session_start();
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header('Location: ../admin-login.php');
+    header('Location: ../admin-login.php');
 
     exit;
 }
 // Helper: make absolute URL from referrer/domain + relative path
-function make_absolute_url(string $path): string {
-    if (preg_match('~^https?://~i', $path)) return $path;
+function make_absolute_url(string $path): string
+{
+    if (preg_match('~^https?://~i', $path))
+        return $path;
 
     $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-    $host   = $_SERVER['HTTP_HOST'];
+    $host = $_SERVER['HTTP_HOST'];
 
     // ✅ Force correct base directory
     $basePath = '/php/api/image-crud/';
@@ -49,6 +51,7 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Image Manager</title>
@@ -70,61 +73,67 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     </script>
 </head>
+
 <body class="bg-light">
-        <?php require_once '../navbar/navbar.php'; ?>
+    <?php require_once '../navbar/navbar.php'; ?>
 
-<div class="p-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📸 Image Manager</h2>
-        <a href="upload.php" class="btn btn-primary">+ Upload New Image</a>
+    <div class="p-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📸 Image Manager</h2>
+            <a href="upload.php" class="btn btn-primary">+ Upload New Image</a>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-3">
+            <input type="text" id="searchInput" class="form-control"
+                placeholder="Search by filename, entity, or type..." onkeyup="filterTable()">
+        </div>
+
+        <table id="imagesTable" class="table table-bordered table-hover align-middle shadow-sm bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Thumbnail</th>
+                    <th>File Name</th>
+                    <th>File URL</th>
+                    <th>Entity</th>
+                    <th>Type</th>
+                    <th>Uploaded At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($images as $img):
+                    $fullUrl = "https://backend.crowndevour.com/php/api/image-crud/" + $img['filepath'];
+                    ?>
+                    <tr>
+                        <td><?= (int) $img['id'] ?></td>
+                        <td>
+                            <img src="<?= htmlspecialchars($fullUrl) ?>" class="img-thumbnail" width="80" alt="preview">
+                        </td>
+                        <td><?= htmlspecialchars($img['filename']) ?></td>
+                        <td>
+                            <a href="<?= htmlspecialchars($fullUrl) ?>"
+                                target="_blank"><?= htmlspecialchars($fullUrl) ?></a>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                onclick="copyToClipboard('<?= htmlspecialchars($fullUrl, ENT_QUOTES) ?>')">Copy</button>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-dark"><?= htmlspecialchars($img['entity_type']) ?></span><br>
+                            <?= htmlspecialchars($img['entity_name']) ?> (ID: <?= (int) $img['entity_id'] ?>)
+                        </td>
+                        <td><span class="badge bg-secondary"><?= htmlspecialchars($img['image_type']) ?></span></td>
+                        <td><?= htmlspecialchars($img['uploaded_at']) ?></td>
+                        <td>
+                            <a href="edit.php?id=<?= (int) $img['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="delete.php?id=<?= (int) $img['id'] ?>" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Delete this image?');">Delete</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
-
-    <!-- Search -->
-    <div class="mb-3">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search by filename, entity, or type..." onkeyup="filterTable()">
-    </div>
-
-    <table id="imagesTable" class="table table-bordered table-hover align-middle shadow-sm bg-white">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Thumbnail</th>
-                <th>File Name</th>
-                <th>File URL</th>
-                <th>Entity</th>
-                <th>Type</th>
-                <th>Uploaded At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($images as $img): 
-            $fullUrl = make_absolute_url($img['filepath']);
-        ?>
-            <tr>
-                <td><?= (int)$img['id'] ?></td>
-                <td>
-                    <img src="<?= htmlspecialchars($fullUrl) ?>" class="img-thumbnail" width="80" alt="preview">
-                </td>
-                <td><?= htmlspecialchars($img['filename']) ?></td>
-                <td>
-                    <a href="<?= htmlspecialchars($fullUrl) ?>" target="_blank"><?= htmlspecialchars($fullUrl) ?></a>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('<?= htmlspecialchars($fullUrl, ENT_QUOTES) ?>')">Copy</button>
-                </td>
-                <td>
-                    <span class="badge bg-info text-dark"><?= htmlspecialchars($img['entity_type']) ?></span><br>
-                    <?= htmlspecialchars($img['entity_name']) ?> (ID: <?= (int)$img['entity_id'] ?>)
-                </td>
-                <td><span class="badge bg-secondary"><?= htmlspecialchars($img['image_type']) ?></span></td>
-                <td><?= htmlspecialchars($img['uploaded_at']) ?></td>
-                <td>
-                    <a href="edit.php?id=<?= (int)$img['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="delete.php?id=<?= (int)$img['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this image?');">Delete</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
 </body>
+
 </html>
