@@ -66,7 +66,7 @@ try {
 
     // 🔗 Convert filepaths to absolute URLs
     foreach ($images as &$img) {
-        $img['filepath'] = "https://backend.crowndevour.com/php/api/image-crud/" + $img['filepath'];
+        $img['filepath'] = "https://backend.crowndevour.com/php/api/image-crud/" . $img['filepath'];
     }
 
     echo json_encode($images);

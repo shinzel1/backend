@@ -104,7 +104,7 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </thead>
             <tbody>
                 <?php foreach ($images as $img):
-                    $fullUrl = "https://backend.crowndevour.com/php/api/image-crud/" + $img['filepath'];
+                    $fullUrl = "https://backend.crowndevour.com/php/api/image-crud/" . $img['filepath'];
                     ?>
                     <tr>
                         <td><?= (int) $img['id'] ?></td>
