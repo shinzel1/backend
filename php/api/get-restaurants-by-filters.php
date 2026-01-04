@@ -10,17 +10,18 @@ require_once './db.php';
 try {
     $payload = json_decode(file_get_contents("php://input"), true);
 
-    $city       = $payload['city'] ?? null;
-    $locality   = $payload['locality'] ?? null;
-    $type       = $payload['type'] ?? null;
-    $cuisine    = $payload['cuisine'] ?? null;
-    $category   = $payload['category'] ?? null;
-    $tag        = $payload['tag'] ?? null;
-    $minRating  = $payload['rating'] ?? null;
-    $minPrice   = $payload['min_price'] ?? null;
-    $maxPrice   = $payload['max_price'] ?? null;
+    $city = $payload['city'] ?? null;
+    $locality = $payload['locality'] ?? null;
+    $type = $payload['type'] ?? null;
+    $cuisine = $payload['cuisine'] ?? null;
+    $category = $payload['category'] ?? null;
+    $tag = $payload['tag'] ?? null;
+    $minRating = $payload['rating'] ?? null;
+    $minPrice = $payload['min_price'] ?? null;
+    $maxPrice = $payload['max_price'] ?? null;
 
-    function normalize($v) {
+    function normalize($v)
+    {
         return strtolower(trim(str_replace('-', ' ', $v)));
     }
 
@@ -48,7 +49,7 @@ try {
 
     if ($type) {
         $sql .= " AND LOWER(restaurantOrCafe) = :type";
-        $params[':type'] = normalize($type);
+        $params[':type'] = '%' . normalize($type) . '%';
     }
 
     if ($cuisine) {
@@ -68,7 +69,7 @@ try {
 
     if ($minRating) {
         $sql .= " AND rating >= :rating";
-        $params[':rating'] = (float)$minRating;
+        $params[':rating'] = (float) $minRating;
     }
 
     /* ---------------- PRICE FILTER ---------------- */
@@ -88,7 +89,7 @@ try {
             ) AS UNSIGNED
         ) >= :minPrice
         ";
-        $params[':minPrice'] = (int)($minPrice ?? 0);
+        $params[':minPrice'] = (int) ($minPrice ?? 0);
 
         if ($maxPrice) {
             $sql .= "
@@ -108,7 +109,7 @@ try {
                 ) AS UNSIGNED
             ) <= :maxPrice
             ";
-            $params[':maxPrice'] = (int)$maxPrice;
+            $params[':maxPrice'] = (int) $maxPrice;
         }
     }
 
