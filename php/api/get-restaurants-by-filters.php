@@ -8,32 +8,42 @@ error_reporting(E_ALL);
 require_once './db.php';
 
 try {
-
     $payload = json_decode(file_get_contents("php://input"), true);
 
-    $city = $payload['city'] ?? null;
-    $type = $payload['type'] ?? null;
-    $locality = $payload['locality'] ?? null;
-    $cuisine = $payload['cuisine'] ?? null;
-    $category = $payload['category'] ?? null;
-    $tag = $payload['tag'] ?? null;
-    $minRating = $payload['rating'] ?? null;
+    $city       = $payload['city'] ?? null;
+    $locality   = $payload['locality'] ?? null;
+    $type       = $payload['type'] ?? null;
+    $cuisine    = $payload['cuisine'] ?? null;
+    $category   = $payload['category'] ?? null;
+    $tag        = $payload['tag'] ?? null;
+    $minRating  = $payload['rating'] ?? null;
+    $minPrice   = $payload['min_price'] ?? null;
+    $maxPrice   = $payload['max_price'] ?? null;
 
-    // 💰 PRICE FILTER
-    $minPrice = $payload['min_price'] ?? null;
-    $maxPrice = $payload['max_price'] ?? null;
-
-    function normalize($value)
-    {
-        return strtolower(trim(str_replace('-', ' ', $value)));
+    function normalize($v) {
+        return strtolower(trim(str_replace('-', ' ', $v)));
     }
 
     /* ---------------- BASE QUERY ---------------- */
 
     $sql = "
-        SELECT *
+        SELECT
+            id,
+            name,
+            title,
+            city,
+            location,
+            restaurantOrCafe,
+            shortDescription,
+            cuisines,
+            tags,
+            rating,
+            image,
+            locationUrl,
+            additional_info,
+            created_at
         FROM restaurants
-        WHERE 
+        WHERE (status = 1 OR status IS NULL)
     ";
 
     $params = [];
@@ -44,52 +54,55 @@ try {
         $sql .= " AND LOWER(city) LIKE :city";
         $params[':city'] = '%' . normalize($city) . '%';
     }
+
     if ($locality) {
         $sql .= " AND LOWER(location) LIKE :locality";
         $params[':locality'] = '%' . normalize($locality) . '%';
     }
+
     if ($type) {
         $sql .= " AND LOWER(restaurantOrCafe) = :type";
         $params[':type'] = normalize($type);
     }
 
     if ($cuisine) {
-        $sql .= " AND LOWER(cuisines) LIKE :cuisine";
-        $params[':cuisine'] = '%' . normalize($cuisine) . '%';
+        $sql .= " AND JSON_SEARCH(LOWER(cuisines), 'one', :cuisine) IS NOT NULL";
+        $params[':cuisine'] = normalize($cuisine);
     }
 
     if ($category) {
-        $sql .= " AND LOWER(category) LIKE :category";
-        $params[':category'] = '%' . normalize($category) . '%';
+        $sql .= " AND JSON_SEARCH(LOWER(category), 'one', :category) IS NOT NULL";
+        $params[':category'] = normalize($category);
     }
 
     if ($tag) {
-        $sql .= " AND LOWER(tags) LIKE :tag";
-        $params[':tag'] = '%' . normalize($tag) . '%';
+        $sql .= " AND JSON_SEARCH(LOWER(tags), 'one', :tag) IS NOT NULL";
+        $params[':tag'] = normalize($tag);
     }
 
     if ($minRating) {
         $sql .= " AND rating >= :rating";
-        $params[':rating'] = (float) $minRating;
+        $params[':rating'] = (float)$minRating;
     }
 
     /* ---------------- PRICE FILTER ---------------- */
 
     if ($minPrice || $maxPrice) {
         $sql .= "
-        AND (
-            CAST(
-                REPLACE(
-                    SUBSTRING_INDEX(
+        AND CAST(
+            REPLACE(
+                SUBSTRING_INDEX(
+                    REPLACE(
                         JSON_UNQUOTE(JSON_EXTRACT(additional_info, '$.price_for_two')),
-                        '-', 1
+                        'AED', ''
                     ),
-                ',', ''
-                ) AS UNSIGNED
-            ) >= :minPrice
+                    '-', 1
+                ),
+            ',', ''
+            ) AS UNSIGNED
+        ) >= :minPrice
         ";
-
-        $params[':minPrice'] = (int) ($minPrice ?? 0);
+        $params[':minPrice'] = (int)($minPrice ?? 0);
 
         if ($maxPrice) {
             $sql .= "
@@ -97,17 +110,19 @@ try {
                 REPLACE(
                     SUBSTRING_INDEX(
                         SUBSTRING_INDEX(
-                            JSON_UNQUOTE(JSON_EXTRACT(additional_info, '$.price_for_two')),
+                            REPLACE(
+                                JSON_UNQUOTE(JSON_EXTRACT(additional_info, '$.price_for_two')),
+                                'AED', ''
+                            ),
                             '-', -1
                         ),
-                    ' ', 1
+                        ' ', 1
                     ),
                 ',', ''
                 ) AS UNSIGNED
             ) <= :maxPrice
             ";
-
-            $params[':maxPrice'] = (int) $maxPrice;
+            $params[':maxPrice'] = (int)$maxPrice;
         }
     }
 
