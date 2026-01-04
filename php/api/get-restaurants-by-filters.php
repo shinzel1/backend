@@ -54,14 +54,13 @@ try {
     /* ---------------- FILTERS ---------------- */
 
     if ($city) {
-        $sql .= " AND LOWER(city) = :city";
-        $params[':city'] = normalize($city);
+        $sql .= " AND LOWER(city) LIKE :city";
+        $params[':city'] = '%' . normalize($city) . '%';
     }
     if ($locality) {
-        $sql .= " AND LOWER(location) like '%:locality%'";
-        $params[':locality'] = normalize($locality);
+        $sql .= " AND LOWER(location) LIKE :locality";
+        $params[':locality'] = '%' . normalize($locality) . '%';
     }
-
     if ($type) {
         $sql .= " AND LOWER(restaurantOrCafe) = :type";
         $params[':type'] = normalize($type);
