@@ -11,18 +11,20 @@ try {
 
     $payload = json_decode(file_get_contents("php://input"), true);
 
-    $city      = $payload['city'] ?? null;
-    $type      = $payload['type'] ?? null;
-    $cuisine   = $payload['cuisine'] ?? null;
-    $category  = $payload['category'] ?? null;
-    $tag       = $payload['tag'] ?? null;
+    $city = $payload['city'] ?? null;
+    $type = $payload['type'] ?? null;
+    $locality = $payload['locality'] ?? null;
+    $cuisine = $payload['cuisine'] ?? null;
+    $category = $payload['category'] ?? null;
+    $tag = $payload['tag'] ?? null;
     $minRating = $payload['rating'] ?? null;
 
     // 💰 PRICE FILTER
-    $minPrice  = $payload['min_price'] ?? null;
-    $maxPrice  = $payload['max_price'] ?? null;
+    $minPrice = $payload['min_price'] ?? null;
+    $maxPrice = $payload['max_price'] ?? null;
 
-    function normalize($value) {
+    function normalize($value)
+    {
         return strtolower(trim(str_replace('-', ' ', $value)));
     }
 
@@ -55,6 +57,10 @@ try {
         $sql .= " AND LOWER(city) = :city";
         $params[':city'] = normalize($city);
     }
+    if ($locality) {
+        $sql .= " AND LOWER(location) like '%:locality%'";
+        $params[':locality'] = normalize($locality);
+    }
 
     if ($type) {
         $sql .= " AND LOWER(restaurantOrCafe) = :type";
@@ -78,7 +84,7 @@ try {
 
     if ($minRating) {
         $sql .= " AND rating >= :rating";
-        $params[':rating'] = (float)$minRating;
+        $params[':rating'] = (float) $minRating;
     }
 
     /* ---------------- PRICE FILTER ---------------- */
@@ -97,7 +103,7 @@ try {
             ) >= :minPrice
         ";
 
-        $params[':minPrice'] = (int)($minPrice ?? 0);
+        $params[':minPrice'] = (int) ($minPrice ?? 0);
 
         if ($maxPrice) {
             $sql .= "
@@ -115,7 +121,7 @@ try {
             ) <= :maxPrice
             ";
 
-            $params[':maxPrice'] = (int)$maxPrice;
+            $params[':maxPrice'] = (int) $maxPrice;
         }
     }
 
@@ -128,15 +134,6 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    /* ---------------- FORMAT ---------------- */
-
-    foreach ($results as &$row) {
-        $row['url'] = "https://crowndevour.com/" . $row['title'];
-        $row['cuisines'] = json_decode($row['cuisines'], true) ?: [];
-        $row['tags'] = json_decode($row['tags'], true) ?: [];
-        $row['additional_info'] = json_decode($row['additional_info'], true) ?: [];
-    }
 
     echo json_encode($results, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
