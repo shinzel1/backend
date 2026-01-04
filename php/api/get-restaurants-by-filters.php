@@ -27,21 +27,7 @@ try {
     /* ---------------- BASE QUERY ---------------- */
 
     $sql = "
-        SELECT
-            id,
-            name,
-            title,
-            city,
-            location,
-            restaurantOrCafe,
-            shortDescription,
-            cuisines,
-            tags,
-            rating,
-            image,
-            locationUrl,
-            additional_info,
-            created_at
+        SELECT *
         FROM restaurants
         WHERE (status = 1 OR status IS NULL)
     ";
