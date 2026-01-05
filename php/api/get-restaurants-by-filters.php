@@ -48,7 +48,7 @@ try {
     }
 
     if ($type) {
-        $sql .= " AND LOWER(restaurantOrCafe) LIKE :type";
+        $sql .= " AND (LOWER(restaurantOrCafe) LIKE :type OR LOWER(overview) LIKE :type)";
         $params[':type'] = '%' . normalize($type) . '%';
     }
 
