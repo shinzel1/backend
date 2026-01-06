@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             must_try=?, service_description=?, service_style=?, reasons_to_visit=?, tips_for_visitors=?,
             location_details=?, additional_info=?, rating=?, category=?, cuisines=?, tags=?,
             locationUrl=?, image=?, gallery=?, menuImage=?, chef_recommendations=?, event_hosting=?,
-            nutritional_breakdown=?, signature_cocktails=?, delivery=?, contact_info=?, reservations=?
+            nutritional_breakdown=?, signature_cocktails=?, delivery=?, contact_info=?, reservations=?,faq=?
             WHERE id=?");
 
         $stmt->execute([
@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             isset($_POST['delivery']) ? 1 : 0,
             ensureJson($_POST['contact_info']),
             ensureJson($_POST['reservations']),
+            ensureJson($_POST['faq']),
             $id
         ]);
 
@@ -270,6 +271,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mb-3"><label>Nutritional Breakdown (JSON)</label>
                         <textarea rows="6" name="nutritional_breakdown"
                             class="form-control"><?= htmlspecialchars($restaurant['nutritional_breakdown']) ?></textarea>
+                    </div>
+                    <div class="mb-3"><label>FAQ Breakdown (JSON)</label>
+                        <textarea rows="6" name="faq"
+                            class="form-control"><?= htmlspecialchars($restaurant['faq']) ?></textarea>
                     </div>
                     <div class="form-check mb-3">
                         <input type="checkbox" name="delivery" class="form-check-input" id="deliveryCheck"
