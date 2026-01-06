@@ -127,6 +127,7 @@ try {
         "delivery" => $restaurant["delivery"] ?? false,
         "contact_info" => $restaurant["contact_info"] ?? [],
         "reservations" => $restaurant["reservations"] ?? [],
+        "faq" => $restaurant["faq"] ?? [],
         "created_at" => $restaurant["created_at"]
     ];
 
