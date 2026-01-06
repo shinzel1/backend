@@ -27,10 +27,7 @@ function ensureJson($value)
     $parts = array_map('trim', explode(',', $value));
     return json_encode($parts, JSON_UNESCAPED_UNICODE);
 }
-function safeJson($array, $key)
-{
-    return json_encode($array[$key] ?? []);
-}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -77,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             isset($_POST['delivery']) ? 1 : 0,
             ensureJson($_POST['contact_info']),
             ensureJson($_POST['reservations']),
-            safeJson($_POST['faq'], 'faq'),
+            ensureJson($_POST['faq']),
             $id
         ]);
 
