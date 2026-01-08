@@ -18,7 +18,7 @@ $stmt = $pdo->prepare("
     WHERE image IS NOT NULL
       AND image != ''
       AND image NOT LIKE :local
-    LIMIT 30
+    LIMIT 100
 ");
 $stmt->execute([
     ':local' => $publicBase . '%'
