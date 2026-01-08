@@ -95,12 +95,13 @@ function safeOutput($value, $default = '—')
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Cover Image</th>
                     <th>Title</th>
                     <th>City</th>
                     <th>Location</th>
-                    <th>category</th>
+                    
                     <th>Rating</th>
                 </tr>
             </thead>
@@ -118,11 +119,11 @@ function safeOutput($value, $default = '—')
                                 —
                             <?php endif; ?>
                         </td>
+                        <td><?= safeOutput($res['image']) ?></td>
                         <td><?= safeOutput($res['name']) ?></td>
                         <td><?= safeOutput($res['title']) ?></td>
                         <td><?= safeOutput($res['city']) ?></td>
                         <td><?= safeOutput($res['location']) ?></td>
-                        <td><?= safeOutput($res['category']) ?></td>
                         <td><?= safeOutput($res['rating']) ?></td>
                     </tr>
                 <?php endforeach ?>
