@@ -135,7 +135,7 @@ if ($_SERVER['HTTP_HOST'] === 'localhost' || $_SERVER['HTTP_HOST'] === '127.0.0.
             <tbody>
                 <?php foreach ($restaurants as $restaurant): ?>
                     <tr>
-                        <td><a
+                        <td><a target="_blank"
                                 href="<?= htmlspecialchars($host) ?>/restaurants/<?= safeOutput($restaurant['id']) ?>/edit"><?= safeOutput($restaurant['id']) ?></a>
                         </td>
                         <td>
