@@ -72,12 +72,61 @@ function fetchWithPrioritySearch(PDO $pdo, string $table, string $searchTerm)
 
     return array_values($unique);
 }
+function fetchWithPrioritySearchh(PDO $pdo, string $table, string $searchTerm)
+{
+    $stmt = $pdo->query("SELECT * FROM `$table`");
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $matchedName = [];
+    $matchedTitle = [];
+    $matchedOther = [];
+
+    foreach ($rows as $row) {
+        $rowLower = array_map(
+            fn($v) => is_string($v) ? strtolower($v) : '',
+            $row
+        );
+
+        // 1️⃣ name column
+        if (!empty($rowLower['title']) && strpos($rowLower['title'], $searchTerm) !== false) {
+            $matchedName[] = $row;
+            continue;
+        }
+
+        // 2️⃣ title column
+        if (!empty($rowLower['slug']) && strpos($rowLower['slug'], $searchTerm) !== false) {
+            $matchedTitle[] = $row;
+            continue;
+        }
+
+        // 3️⃣ any other column
+        foreach ($rowLower as $col => $value) {
+            if (in_array($col, ['name', 'title'], true)) {
+                continue;
+            }
+            if ($value && strpos($value, $searchTerm) !== false) {
+                $matchedOther[] = $row;
+                break;
+            }
+        }
+    }
+
+    // Merge in priority order and remove duplicates
+    $merged = array_merge($matchedName, $matchedTitle, $matchedOther);
+
+    $unique = [];
+    foreach ($merged as $item) {
+        $unique[$item['id'] ?? md5(json_encode($item))] = $item;
+    }
+
+    return array_values($unique);
+}
 
 try {
     echo json_encode([
         "restaurants" => fetchWithPrioritySearch($pdo, 'restaurants', $searchTerm),
-        "blogs" => fetchWithPrioritySearch($pdo, 'blogs', $searchTerm),
-        "recipes" => fetchWithPrioritySearch($pdo, 'recipes', $searchTerm),
+        "blogs" => fetchWithPrioritySearchh($pdo, 'blogs', $searchTerm),
+        "recipes" => fetchWithPrioritySearchh($pdo, 'recipes', $searchTerm),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (PDOException $e) {
