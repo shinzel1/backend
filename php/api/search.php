@@ -17,52 +17,69 @@ $searchTerm = isset($input['query']) ? strtolower(trim($input['query'])) : '';
 if (!$searchTerm || strlen($searchTerm) < 2) {
     echo json_encode([
         "restaurants" => [],
-        "blogs" => []
+        "blogs" => [],
+        "recipes" => []
     ]);
     exit;
 }
 
-// Utility to fetch and filter rows
-function fetchAndFilter($pdo, $table, $searchTerm, $nameField = 'name') {
-    $stmt = $pdo->query("SELECT * FROM $table");
-    $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+function fetchWithPrioritySearch(PDO $pdo, string $table, string $searchTerm)
+{
+    $stmt = $pdo->query("SELECT * FROM `$table`");
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $matchedByName = [];
-    $matchedByFull = [];
+    $matchedName = [];
+    $matchedTitle = [];
+    $matchedOther = [];
 
-    foreach ($all as $row) {
-        $rowStr = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $name = strtolower($row[$nameField] ?? '');
+    foreach ($rows as $row) {
+        $rowLower = array_map(
+            fn($v) => is_string($v) ? strtolower($v) : '',
+            $row
+        );
 
-        if (strpos($name, $searchTerm) !== false) {
-            $matchedByName[] = $row;
+        // 1️⃣ name column
+        if (!empty($rowLower['name']) && strpos($rowLower['name'], $searchTerm) !== false) {
+            $matchedName[] = $row;
+            continue;
         }
-        if (strpos(strtolower($rowStr), $searchTerm) !== false) {
-            $matchedByFull[] = $row;
+
+        // 2️⃣ title column
+        if (!empty($rowLower['title']) && strpos($rowLower['title'], $searchTerm) !== false) {
+            $matchedTitle[] = $row;
+            continue;
+        }
+
+        // 3️⃣ any other column
+        foreach ($rowLower as $col => $value) {
+            if (in_array($col, ['name', 'title'], true)) {
+                continue;
+            }
+            if ($value && strpos($value, $searchTerm) !== false) {
+                $matchedOther[] = $row;
+                break;
+            }
         }
     }
 
-    // Merge and filter unique
-    $combined = array_merge($matchedByName, $matchedByFull);
-    $unique = array_values(array_reduce($combined, function ($carry, $item) {
-        $hash = md5(json_encode($item));
-        $carry[$hash] = $item;
-        return $carry;
-    }, []));
+    // Merge in priority order and remove duplicates
+    $merged = array_merge($matchedName, $matchedTitle, $matchedOther);
 
-    return $unique;
+    $unique = [];
+    foreach ($merged as $item) {
+        $unique[$item['id'] ?? md5(json_encode($item))] = $item;
+    }
+
+    return array_values($unique);
 }
 
 try {
-    $filteredRestaurants = fetchAndFilter($pdo, 'restaurants', $searchTerm, 'name');
-    $filteredBlogs = fetchAndFilter($pdo, 'blogs', $searchTerm, 'name');
-    $filteredRecipes = fetchAndFilter($pdo, 'recipes', $searchTerm, 'title');
-
     echo json_encode([
-        "restaurants" => $filteredRestaurants,
-        "blogs" => $filteredBlogs,
-        "recipes" => $filteredRecipes
+        "restaurants" => fetchWithPrioritySearch($pdo, 'restaurants', $searchTerm),
+        "blogs" => fetchWithPrioritySearch($pdo, 'blogs', $searchTerm),
+        "recipes" => fetchWithPrioritySearch($pdo, 'recipes', $searchTerm),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode([
