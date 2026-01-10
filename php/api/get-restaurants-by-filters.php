@@ -43,7 +43,7 @@ try {
     }
 
     if ($locality) {
-        $sql .= " AND LOWER(location) LIKE :locality";
+        $sql .= " AND LOWER(location) LIKE :locality OR LOWER(restaurantOrCafe) LIKE :locality";
         $params[':locality'] = '%' . normalize($locality) . '%';
     }
 
