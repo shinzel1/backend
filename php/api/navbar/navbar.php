@@ -26,7 +26,7 @@
                     <a class="nav-link" href="../recipe">recipe</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../searched-queries">query</a>
+                    <a class="nav-link" href="../searched-queries.php">query</a>
                 </li>
             </ul>
             <div class="d-flex" role="search">
