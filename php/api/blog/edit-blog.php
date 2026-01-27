@@ -119,73 +119,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </form>
 
-   <script>
-let editorInstance;
+    <script>
+        let editorInstance;
 
-document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
-    const titleInput = document.getElementById('title');
-    const slugInput = document.getElementById('slug');
+            const titleInput = document.getElementById('title');
+            const slugInput = document.getElementById('slug');
 
-    // Auto slug
-    titleInput.addEventListener('input', () => {
-        slugInput.value = titleInput.value
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
-    });
-
-    ClassicEditor
-        .create(document.querySelector('#editor'), {
-            toolbar: {
-                items: [
-                    'heading', '|',
-                    'bold', 'italic', 'underline', 'strikethrough', '|',
-                    'link', 'bulletedList', 'numberedList', '|',
-                    'blockQuote', 'codeBlock', 'insertTable', '|',
-                    'undo', 'redo'
-                ]
-            },
-            heading: {
-                options: [
-                    { model: 'paragraph', title: 'Paragraph' },
-                    { model: 'heading1', view: 'h1', title: 'Heading 1' },
-                    { model: 'heading2', view: 'h2', title: 'Heading 2' },
-                    { model: 'heading3', view: 'h3', title: 'Heading 3' }
-                ]
-            }
-        })
-        .then(editor => {
-            editorInstance = editor;
-
-            // Load autosave only if empty
-            const saved = localStorage.getItem('blog_edit_draft_<?= $id ?>');
-            if (saved && editor.getData().trim() === '') {
-                editor.setData(saved);
-            }
-
-            updateStats(editor.getData());
-
-            editor.model.document.on('change:data', () => {
-                const text = editor.getData().replace(/<[^>]*>/g, '');
-                updateStats(text);
-
-                localStorage.setItem('blog_edit_draft_<?= $id ?>', editor.getData());
+            // Auto slug
+            titleInput.addEventListener('input', () => {
+                slugInput.value = titleInput.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
             });
-        })
-        .catch(error => console.error(error));
 
-    function updateStats(text) {
-        const words = text.trim().split(/\s+/).filter(w => w.length).length;
-        const chars = text.length;
-        const readTime = Math.max(1, Math.ceil(words / 200));
+            ClassicEditor
+                .create(document.querySelector('#editor'), {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', '|',
+                            'fontSize', 'fontColor', 'fontBackgroundColor', '|',
+                            'alignment:left', 'alignment:center', 'alignment:right', '|',
+                            'link', 'imageUpload', 'mediaEmbed', '|',
+                            'bulletedList', 'numberedList', 'todoList', '|',
+                            'blockQuote', 'codeBlock', 'insertTable', 'horizontalLine', '|',
+                            'removeFormat', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    heading: {
+                        options: [
+                            { model: 'paragraph', title: 'Paragraph' },
+                            { model: 'heading1', view: 'h1', title: 'Heading 1' },
+                            { model: 'heading2', view: 'h2', title: 'Heading 2' },
+                            { model: 'heading3', view: 'h3', title: 'Heading 3' }
+                        ]
+                    }
+                })
+                .then(editor => {
+                    editorInstance = editor;
 
-        document.getElementById('wordCount').innerText = `Words: ${words}`;
-        document.getElementById('charCount').innerText = `Characters: ${chars}`;
-        document.getElementById('readingTime').innerText = `Reading time: ${readTime} min`;
-    }
-});
-</script>
+                    // Load autosave only if empty
+                    const saved = localStorage.getItem('blog_edit_draft_<?= $id ?>');
+                    if (saved && editor.getData().trim() === '') {
+                        editor.setData(saved);
+                    }
+
+                    updateStats(editor.getData());
+
+                    editor.model.document.on('change:data', () => {
+                        const text = editor.getData().replace(/<[^>]*>/g, '');
+                        updateStats(text);
+
+                        localStorage.setItem('blog_edit_draft_<?= $id ?>', editor.getData());
+                    });
+                })
+                .catch(error => console.error(error));
+
+            function updateStats(text) {
+                const words = text.trim().split(/\s+/).filter(w => w.length).length;
+                const chars = text.length;
+                const readTime = Math.max(1, Math.ceil(words / 200));
+
+                document.getElementById('wordCount').innerText = `Words: ${words}`;
+                document.getElementById('charCount').innerText = `Characters: ${chars}`;
+                document.getElementById('readingTime').innerText = `Reading time: ${readTime} min`;
+            }
+        });
+    </script>
 
 
 
