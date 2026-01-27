@@ -157,6 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             { model: 'heading2', view: 'h2', title: 'Heading 2' },
                             { model: 'heading3', view: 'h3', title: 'Heading 3' }
                         ]
+                    },
+                    simpleUpload: {
+                        uploadUrl: 'upload-image.php'
                     }
                 })
                 .then(editor => {
