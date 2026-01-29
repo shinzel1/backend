@@ -64,7 +64,7 @@ try {
        Paginated data
     ============================ */
     $sql = "
-        SELECT id, name, slug, city, cuisines, rating, image
+        SELECT id, name, title, city, overview, image,restaurantOrCafe
         FROM restaurants
         ORDER BY id DESC
         LIMIT :limit OFFSET :offset
