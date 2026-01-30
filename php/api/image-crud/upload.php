@@ -1,93 +1,156 @@
 <?php
 require_once '../db.php';
 session_start();
+
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header('Location: ../admin-login.php');
     exit;
 }
 
+/* ================= AVIF CONVERTER ================= */
+
+function convertToAvif($sourcePath, $destinationPath, $quality = 55)
+{
+    $info = getimagesize($sourcePath);
+    if (!$info) {
+        throw new Exception("Invalid image file.");
+    }
+
+    switch ($info['mime']) {
+        case 'image/jpeg':
+            $image = imagecreatefromjpeg($sourcePath);
+            break;
+
+        case 'image/png':
+            $image = imagecreatefrompng($sourcePath);
+            imagepalettetotruecolor($image);
+            imagealphablending($image, true);
+            imagesavealpha($image, true);
+            break;
+
+        case 'image/webp':
+            $image = imagecreatefromwebp($sourcePath);
+            break;
+
+        case 'image/avif':
+            return rename($sourcePath, $destinationPath);
+
+        default:
+            throw new Exception("Unsupported image type.");
+    }
+
+    if (!imageavif($image, $destinationPath, $quality)) {
+        imagedestroy($image);
+        throw new Exception("AVIF conversion failed.");
+    }
+
+    imagedestroy($image);
+    unlink($sourcePath); // remove original
+    return true;
+}
+
+/* ================= UPLOAD HANDLER ================= */
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $entityType = $_POST['entity_type'];   // restaurant / blog / recipe
-    $entityId = intval($_POST['entity_id']);
-    $imageType = $_POST['image_type'] ?? 'gallery';
-    $uploadDir = "uploads/";
+
+    $entityType = $_POST['entity_type'];
+    $entityId   = intval($_POST['entity_id']);
+    $imageType  = $_POST['image_type'] ?? 'gallery';
+
+    $uploadDir = "uploads/avif/";
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
-    $imageId = null;
-    $safeName = null;
-    $targetFile = null;
-
     try {
-        // Case 1: Image uploaded via file
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $filename = basename($_FILES['image']['name']);
-            $safeName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $filename);
-            $targetFile = $uploadDir . time() . "_" . $safeName;
 
-            if (!move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-                throw new Exception("Error uploading file!");
-            }
+        $tempFile = null;
+
+        /* ===== CASE 1: FILE UPLOAD ===== */
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $tempFile = $_FILES['image']['tmp_name'];
         }
-        // Case 2: Image uploaded via URL
+
+        /* ===== CASE 2: IMAGE URL ===== */
         elseif (!empty($_POST['image_url'])) {
-            $imageUrl = trim($_POST['image_url']);
+            $imageUrl  = trim($_POST['image_url']);
             $imageData = @file_get_contents($imageUrl);
+
             if ($imageData === false) {
                 throw new Exception("Failed to download image from URL.");
             }
 
-            $ext = pathinfo(parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION);
-            if (!$ext) $ext = "jpg";
-
-            $fileName = uniqid("img_") . "." . $ext;
-            $safeName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $fileName);
-            $targetFile = $uploadDir . time() . "_" . $safeName;
-
-            if (!file_put_contents($targetFile, $imageData)) {
-                throw new Exception("Failed to save image from URL.");
-            }
-        } else {
-            throw new Exception("No image provided!");
+            $tempFile = tempnam(sys_get_temp_dir(), 'img_');
+            file_put_contents($tempFile, $imageData);
         }
 
-        // Save in master images table
-        $stmt = $pdo->prepare("INSERT INTO images (filename, filepath, uploaded_at) VALUES (:filename, :filepath, NOW())");
+        else {
+            throw new Exception("No image provided.");
+        }
+
+        /* ===== CONVERT TO AVIF ===== */
+
+        $avifName   = uniqid("img_") . ".avif";
+        $targetFile = $uploadDir . $avifName;
+
+        convertToAvif($tempFile, $targetFile, 55);
+
+        /* ===== SAVE MASTER IMAGE ===== */
+
+        $stmt = $pdo->prepare(
+            "INSERT INTO images (filename, filepath, uploaded_at)
+             VALUES (:filename, :filepath, NOW())"
+        );
         $stmt->execute([
-            ':filename' => $safeName,
+            ':filename' => $avifName,
             ':filepath' => $targetFile
         ]);
+
         $imageId = $pdo->lastInsertId();
 
-        // Map into correct table
+        /* ===== ENTITY MAPPING ===== */
+
         switch ($entityType) {
             case 'restaurant':
-                $mapStmt = $pdo->prepare("INSERT INTO restaurant_images (restaurant_id, image_id, type) VALUES (:entity_id, :image_id, :type)");
+                $mapStmt = $pdo->prepare(
+                    "INSERT INTO restaurant_images (restaurant_id, image_id, type)
+                     VALUES (:entity_id, :image_id, :type)"
+                );
                 break;
+
             case 'blog':
-                $mapStmt = $pdo->prepare("INSERT INTO blog_images (blog_id, image_id, type) VALUES (:entity_id, :image_id, :type)");
+                $mapStmt = $pdo->prepare(
+                    "INSERT INTO blog_images (blog_id, image_id, type)
+                     VALUES (:entity_id, :image_id, :type)"
+                );
                 break;
+
             case 'recipe':
-                $mapStmt = $pdo->prepare("INSERT INTO recipe_images (recipe_id, image_id, type) VALUES (:entity_id, :image_id, :type)");
+                $mapStmt = $pdo->prepare(
+                    "INSERT INTO recipe_images (recipe_id, image_id, type)
+                     VALUES (:entity_id, :image_id, :type)"
+                );
                 break;
+
             default:
-                throw new Exception("Invalid entity type!");
+                throw new Exception("Invalid entity type.");
         }
 
         $mapStmt->execute([
             ':entity_id' => $entityId,
-            ':image_id' => $imageId,
-            ':type' => $imageType
+            ':image_id'  => $imageId,
+            ':type'      => $imageType
         ]);
 
         header("Location: index.php?success=1");
         exit;
+
     } catch (Exception $e) {
-        echo "<div class='alert alert-danger'>❌ " . $e->getMessage() . "</div>";
+        echo "<div class='alert alert-danger'>❌ {$e->getMessage()}</div>";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,7 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             text-align: center;
             color: #6c757d;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
         }
         .drop-zone.dragover {
             background: #e9f5ff;
@@ -110,16 +172,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #0a58ca;
         }
         .drop-zone input { display: none; }
-        #preview { margin-top: 15px; text-align: center; }
-        #preview img { max-width: 250px; border-radius: 10px; margin-top: 10px; }
+        #preview img { max-width: 250px; margin-top: 10px; border-radius: 10px; }
     </style>
 </head>
+
 <body class="bg-light">
 <?php require_once '../navbar/navbar.php'; ?>
+
 <div class="container mt-5">
     <h2>Upload Image</h2>
-    <form action="" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
-        <!-- Entity Selection -->
+
+    <form method="post" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
+
         <div class="mb-3">
             <label class="form-label">Entity Type</label>
             <select name="entity_type" id="entity_type" class="form-control" required>
@@ -129,106 +193,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="recipe">Recipe</option>
             </select>
         </div>
+
         <div class="mb-3">
             <label class="form-label">Select Entity</label>
-            <select name="entity_id" id="entity_id" class="form-control" required>
-                <option value="">-- Select an Entity --</option>
-            </select>
+            <select name="entity_id" id="entity_id" class="form-control" required></select>
         </div>
 
-        <!-- Searchable dropdown -->
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
         <script>
-            $(document).ready(function () {
-                $('#entity_id').select2({
-                    placeholder: "Search and select...",
-                    ajax: {
-                        url: 'fetch_entities.php',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return { q: params.term, type: $('#entity_type').val() };
-                        },
-                        processResults: function (data) { return { results: data }; },
-                        cache: true
-                    }
-                });
-                $('#entity_type').on('change', function () {
-                    $('#entity_id').val(null).trigger('change');
-                });
+        $(function () {
+            $('#entity_id').select2({
+                placeholder: "Search...",
+                ajax: {
+                    url: 'fetch_entities.php',
+                    dataType: 'json',
+                    delay: 250,
+                    data: params => ({
+                        q: params.term,
+                        type: $('#entity_type').val()
+                    }),
+                    processResults: data => ({ results: data })
+                }
             });
+
+            $('#entity_type').on('change', () => {
+                $('#entity_id').val(null).trigger('change');
+            });
+        });
         </script>
 
-        <!-- Image Type -->
         <div class="mb-3">
             <label class="form-label">Image Type</label>
             <select name="image_type" class="form-control">
                 <option value="cover">Cover</option>
                 <option value="gallery">Gallery</option>
-                <option value="menu">Menu (for restaurants)</option>
-                <option value="steps">Steps (for recipes)</option>
+                <option value="menu">Menu</option>
+                <option value="steps">Steps</option>
                 <option value="other">Other</option>
             </select>
         </div>
 
-        <!-- Drag & Drop -->
         <div class="drop-zone mb-3" id="dropZone">
-            <p>Drag & Drop your image here or click to select</p>
-            <input type="file" name="image" id="image" accept="image/*">
+            <p>Drag & Drop image or click</p>
+            <input type="file" name="image" id="image" accept="image/*,.avif">
         </div>
 
-        <!-- OR URL -->
         <div class="mb-3">
-            <label class="form-label">Or Paste Image URL</label>
-            <input type="text" name="image_url" class="form-control" placeholder="https://example.com/image.jpg">
+            <label class="form-label">Or Image URL</label>
+            <input type="text" name="image_url" class="form-control">
         </div>
 
-        <!-- Preview -->
         <div id="preview"></div>
 
-        <button type="submit" class="btn btn-primary mt-3">Upload</button>
+        <button class="btn btn-primary mt-3">Upload</button>
         <a href="index.php" class="btn btn-secondary mt-3">Back</a>
     </form>
 </div>
 
 <script>
-    const dropZone = document.getElementById("dropZone");
-    const fileInput = document.getElementById("image");
-    const preview = document.getElementById("preview");
+const dz = document.getElementById("dropZone");
+const fi = document.getElementById("image");
+const preview = document.getElementById("preview");
 
-    dropZone.addEventListener("click", () => fileInput.click());
-    dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault(); dropZone.classList.add("dragover");
-    });
-    dropZone.addEventListener("dragleave", () => {
-        dropZone.classList.remove("dragover");
-    });
-    dropZone.addEventListener("drop", (e) => {
-        e.preventDefault(); dropZone.classList.remove("dragover");
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            showPreview(fileInput.files[0]);
-        }
-    });
-    fileInput.addEventListener("change", () => {
-        if (fileInput.files.length) {
-            showPreview(fileInput.files[0]);
-        }
-    });
+dz.onclick = () => fi.click();
+dz.ondragover = e => { e.preventDefault(); dz.classList.add("dragover"); };
+dz.ondragleave = () => dz.classList.remove("dragover");
+dz.ondrop = e => {
+    e.preventDefault();
+    dz.classList.remove("dragover");
+    fi.files = e.dataTransfer.files;
+    showPreview(fi.files[0]);
+};
+fi.onchange = () => showPreview(fi.files[0]);
 
-    function showPreview(file) {
-        if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            }
-            reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = `<p class="text-danger">Selected file is not an image.</p>`;
-        }
-    }
+function showPreview(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => preview.innerHTML = `<img src="${e.target.result}">`;
+    reader.readAsDataURL(file);
+}
 </script>
 </body>
 </html>
