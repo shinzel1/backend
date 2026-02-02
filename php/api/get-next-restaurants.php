@@ -35,7 +35,7 @@ try {
       - We fetch next older restaurants for internal linking
     */
     $sql = "
-        SELECT id, name, slug, image, city, cuisines
+        SELECT id, name, title, city, overview, image,restaurantOrCafe
         FROM restaurants
         WHERE id < :current_id
         ORDER BY id DESC
