@@ -48,7 +48,7 @@ try {
 
     if (!$row) {
         http_response_code(404);
-        echo json_encode(["error" => "Restaurant not found"]);
+        echo json_encode(["error" => "not all Restaurant found"]);
         exit;
     }
 
