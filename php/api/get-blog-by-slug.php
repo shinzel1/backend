@@ -44,7 +44,7 @@ try {
         exit;
     }
 
-    $stmt = $pdo->prepare("SELECT title, author, tags, content,summary, cover_image FROM blogs WHERE slug = :slug");
+    $stmt = $pdo->prepare("SELECT id, title, author, tags, content,summary, cover_image FROM blogs WHERE slug = :slug");
     $stmt->execute([':slug' => $slug]);
     $blog = $stmt->fetch(PDO::FETCH_ASSOC);
 
