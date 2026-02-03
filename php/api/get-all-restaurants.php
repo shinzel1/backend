@@ -23,10 +23,10 @@ $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 3;
 
 try {
     if ($limit === -1) {
-        $stmt = $pdo->query("SELECT * FROM restaurants ORDER BY id DESC");
+        $stmt = $pdo->query("SELECT  id, name, title, city, overview, image,restaurantOrCafe FROM restaurants ORDER BY id DESC");
     } else {
         // 🚨 Do NOT use bindValue for LIMIT — instead, inject the integer directly
-        $stmt = $pdo->query("SELECT * FROM restaurants ORDER BY id DESC LIMIT $limit");
+        $stmt = $pdo->query("SELECT  id, name, title, city, overview, image,restaurantOrCafe FROM restaurants ORDER BY id DESC LIMIT $limit");
     }
     $stmt->execute();
     $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
