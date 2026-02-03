@@ -35,7 +35,7 @@ try {
       - We fetch next older restaurants for internal linking
     */
     $sql = "
-        SELECT id,  title, slug, created_at
+        SELECT id, title, slug, created_at
         FROM recipes
         WHERE id < :current_id
         ORDER BY id DESC
@@ -47,10 +47,10 @@ try {
         ":current_id" => $currentId
     ]);
 
-    $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $recipes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([
-        "next_restaurants" => $restaurants
+        "next_recipes" => $recipes
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (PDOException $e) {
