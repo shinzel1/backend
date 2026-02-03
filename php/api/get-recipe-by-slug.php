@@ -47,7 +47,7 @@ try {
     }
 
     $stmt = $pdo->prepare("
-        SELECT
+        SELECT id,
             title,
             slug,
             description,
