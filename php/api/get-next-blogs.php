@@ -33,7 +33,7 @@ if ($currentId <= 0) {
 try {
     /* ===== Fetch next older blogs ===== */
     $sql = "
-        SELECT id, title, slug, featured_image, created_at
+        SELECT id, title, slug, created_at
         FROM blogs
         WHERE id < :current_id
         ORDER BY id DESC
@@ -50,7 +50,7 @@ try {
     /* ===== Fallback: latest blogs if none found ===== */
     if (empty($blogs)) {
         $fallbackSql = "
-            SELECT id, title, slug, featured_image, created_at
+            SELECT id, title, slug, created_at
             FROM blogs
             ORDER BY id DESC
             LIMIT $limit
