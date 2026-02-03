@@ -47,22 +47,7 @@ try {
     }
 
     $stmt = $pdo->prepare("
-        SELECT id,
-            title,
-            slug,
-            description,
-            ingredients,
-            instructions,
-            tags,
-            cover_image,
-            recipe_category,
-            recipe_cuisine,
-            prep_time,
-            cook_time,
-            video_url,
-            aggregate_rating,
-            rating_count,
-            nutrition
+        SELECT *
         FROM recipes
         WHERE slug = :slug
         LIMIT 1
