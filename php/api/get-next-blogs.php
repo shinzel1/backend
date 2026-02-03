@@ -21,6 +21,9 @@ if (isset($headers['Authorization'])) {
 $currentId = isset($_GET['current_id']) ? intval($_GET['current_id']) : 0;
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 3;
 
+/* ===== Safety ===== */
+$limit = max(1, min($limit, 6));
+
 if ($currentId <= 0) {
     http_response_code(400);
     echo json_encode(["message" => "Invalid current_id"]);
@@ -28,14 +31,9 @@ if ($currentId <= 0) {
 }
 
 try {
-    /*
-      Assumption:
-      - Higher ID = newer
-      - Detail page is showing current restaurant
-      - We fetch next older restaurants for internal linking
-    */
+    /* ===== Fetch next older blogs ===== */
     $sql = "
-        SELECT id, title, slug
+        SELECT id, title, slug, featured_image, created_at
         FROM blogs
         WHERE id < :current_id
         ORDER BY id DESC
@@ -47,10 +45,21 @@ try {
         ":current_id" => $currentId
     ]);
 
-    $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    /* ===== Fallback: latest blogs if none found ===== */
+    if (empty($blogs)) {
+        $fallbackSql = "
+            SELECT id, title, slug, featured_image, created_at
+            FROM blogs
+            ORDER BY id DESC
+            LIMIT $limit
+        ";
+        $blogs = $pdo->query($fallbackSql)->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     echo json_encode([
-        "next_blogs" => $restaurants
+        "next_blogs" => $blogs
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (PDOException $e) {
@@ -60,3 +69,4 @@ try {
         "error" => $e->getMessage()
     ]);
 }
+?>
