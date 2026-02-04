@@ -9,7 +9,7 @@ error_reporting(E_ALL);
 require_once './db.php'; // ✅ Fixed path
 
 try {
-    $stmt = $pdo->query("SELECT slug FROM recipes"); // ✅ make sure 'recipes' table exists
+    $stmt = $pdo->query("SELECT slug FROM recipes ORDER BY id DESC"); // ✅ make sure 'recipes' table exists
     $slugs = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($slugs);
 } catch (PDOException $e) {
