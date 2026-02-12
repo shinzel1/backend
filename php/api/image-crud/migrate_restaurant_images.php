@@ -4,89 +4,104 @@ require_once '../db.php';
 set_time_limit(0);
 ini_set('memory_limit', '512M');
 
-$uploadDir = __DIR__ . '/uploads/';
+$uploadDir  = __DIR__ . '/uploads/';
 $publicBase = 'https://backend.crowndevour.com/php/api/image-crud/uploads/';
+$quality    = 45; // ✅ AVIF compression (lower = smaller)
 
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-// Fetch restaurants that still use external images
+/**
+ * Convert image binary to AVIF
+ */
+function convertToAvif(string $imageData, string $target, int $quality = 45): bool
+{
+    // ✅ Use Imagick if available
+    if (extension_loaded('imagick')) {
+        try {
+            $img = new Imagick();
+            $img->readImageBlob($imageData);
+            $img->setImageFormat('avif');
+            $img->setImageCompressionQuality($quality);
+            $img->stripImage();
+            $img->writeImage($target);
+            $img->clear();
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    // 🔁 Fallback to GD (PHP 8.1+)
+    if (function_exists('imagecreatefromstring')) {
+        $im = imagecreatefromstring($imageData);
+        if (!$im) return false;
+
+        imageavif($im, $target, $quality);
+        imagedestroy($im);
+        return true;
+    }
+
+    return false;
+}
+
+// 🔍 Fetch restaurants whose images are NOT already AVIF
 $stmt = $pdo->prepare("
     SELECT id, image 
     FROM restaurants
     WHERE image IS NOT NULL
       AND image != ''
-      AND image NOT LIKE :local
+      AND image NOT LIKE '%.avif'
     LIMIT 100
 ");
-$stmt->execute([
-    ':local' => $publicBase . '%'
-]);
-
+$stmt->execute();
 $restaurants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($restaurants as $row) {
 
-    $restaurantId = $row['id'];
-    $sourceUrl = trim($row['image']);
+    $id  = $row['id'];
+    $url = trim($row['image']);
 
-    echo "Processing restaurant ID {$restaurantId}\n";
+    echo "🔄 Processing restaurant ID {$id}\n";
 
-    // Download with User-Agent (important for Google)
+    // Download image
     $context = stream_context_create([
-        "http" => [
-            "header" => "User-Agent: Mozilla/5.0\r\n",
-            "timeout" => 20
+        'http' => [
+            'header'  => "User-Agent: Mozilla/5.0\r\n",
+            'timeout' => 20
         ]
     ]);
 
-    $imageData = @file_get_contents($sourceUrl, false, $context);
-    if ($imageData === false) {
+    $imageData = @file_get_contents($url, false, $context);
+    if (!$imageData) {
         echo "❌ Download failed\n";
         continue;
     }
 
-    // Detect extension
-    $path = parse_url($sourceUrl, PHP_URL_PATH);
-    $ext = pathinfo($path, PATHINFO_EXTENSION);
-
-    if (!$ext || strlen($ext) > 4) {
-        $ext = 'jpg';
-    }
-
-    // Generate safe filename
-    $fileName = time() . '_img_' . uniqid() . '.' . $ext;
-    $relative = 'uploads/' . $fileName;
+    // Generate AVIF filename
+    $fileName   = time() . '_restaurant_' . uniqid() . '.avif';
     $targetFile = $uploadDir . $fileName;
 
-    if (!file_put_contents($targetFile, $imageData)) {
-        echo "❌ Save failed\n";
+    if (!convertToAvif($imageData, $targetFile, $quality)) {
+        echo "❌ AVIF conversion failed\n";
         continue;
     }
 
-    // Insert into images table
-    $imgStmt = $pdo->prepare("
+    // Save image record
+    $pdo->prepare("
         INSERT INTO images (filename, filepath, uploaded_at)
-        VALUES (:filename, :filepath, NOW())
-    ");
-    $imgStmt->execute([
-        ':filename' => $fileName,
-        ':filepath' => $relative
-    ]);
+        VALUES (?, ?, NOW())
+    ")->execute([$fileName, 'uploads/' . $fileName]);
 
-    // Update restaurant image column
-    $updateStmt = $pdo->prepare("
-        UPDATE restaurants
-        SET image = :image
-        WHERE id = :id
-    ");
-    $updateStmt->execute([
-        ':image' => $publicBase . $fileName,
-        ':id' => $restaurantId
-    ]);
+    // Update restaurant image
+    $pdo->prepare("
+        UPDATE restaurants 
+        SET image = ? 
+        WHERE id = ?
+    ")->execute([$publicBase . $fileName, $id]);
 
-    echo "✅ Migrated successfully\n";
+    echo "✅ Converted to AVIF\n";
 }
 
-echo "Migration batch finished.";
+echo "🎉 AVIF migration completed.";
