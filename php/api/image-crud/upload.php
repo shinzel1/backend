@@ -54,12 +54,12 @@ function convertToAvif($sourcePath, $destinationPath, $quality = 55)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $entityType = $_POST['entity_type'];
-    $entityId   = intval($_POST['entity_id']);
-    $imageType  = $_POST['image_type'] ?? 'gallery';
+    $entityId = intval($_POST['entity_id']);
+    $imageType = $_POST['image_type'] ?? 'gallery';
 
     $uploadDir = "uploads/avif/";
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+        mkdir($uploadDir, 0755, true);
     }
 
     try {
@@ -71,9 +71,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $tempFile = $_FILES['image']['tmp_name'];
         }
 
-        /* ===== CASE 2: IMAGE URL ===== */
-        elseif (!empty($_POST['image_url'])) {
-            $imageUrl  = trim($_POST['image_url']);
+        /* ===== CASE 2: IMAGE URL ===== */ elseif (!empty($_POST['image_url'])) {
+            $imageUrl = trim($_POST['image_url']);
+            if (!filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                throw new Exception("Invalid URL.");
+            }
+
+
             $imageData = @file_get_contents($imageUrl);
 
             if ($imageData === false) {
@@ -82,15 +86,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $tempFile = tempnam(sys_get_temp_dir(), 'img_');
             file_put_contents($tempFile, $imageData);
-        }
-
-        else {
+        } else {
             throw new Exception("No image provided.");
         }
 
+
+        $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+
+        $info = getimagesize($tempFile);
+        if (!$info || !in_array($info['mime'], $allowedMime)) {
+            throw new Exception("Invalid or unsupported image format.");
+        }
+
+
+
         /* ===== CONVERT TO AVIF ===== */
 
-        $avifName   = uniqid("img_") . ".avif";
+        $avifName = uniqid("img_") . ".avif";
         $targetFile = $uploadDir . $avifName;
 
         convertToAvif($tempFile, $targetFile, 55);
@@ -109,38 +121,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $imageId = $pdo->lastInsertId();
 
         /* ===== ENTITY MAPPING ===== */
-
-        switch ($entityType) {
-            case 'restaurant':
-                $mapStmt = $pdo->prepare(
-                    "INSERT INTO restaurant_images (restaurant_id, image_id, type)
+        if ($entityType != "images") {
+            switch ($entityType) {
+                case 'restaurant':
+                    $mapStmt = $pdo->prepare(
+                        "INSERT INTO restaurant_images (restaurant_id, image_id, type)
                      VALUES (:entity_id, :image_id, :type)"
-                );
-                break;
+                    );
+                    break;
 
-            case 'blog':
-                $mapStmt = $pdo->prepare(
-                    "INSERT INTO blog_images (blog_id, image_id, type)
+                case 'blog':
+                    $mapStmt = $pdo->prepare(
+                        "INSERT INTO blog_images (blog_id, image_id, type)
                      VALUES (:entity_id, :image_id, :type)"
-                );
-                break;
+                    );
+                    break;
 
-            case 'recipe':
-                $mapStmt = $pdo->prepare(
-                    "INSERT INTO recipe_images (recipe_id, image_id, type)
+                case 'recipe':
+                    $mapStmt = $pdo->prepare(
+                        "INSERT INTO recipe_images (recipe_id, image_id, type)
                      VALUES (:entity_id, :image_id, :type)"
-                );
-                break;
+                    );
+                    break;
 
-            default:
-                throw new Exception("Invalid entity type.");
+                default:
+                    throw new Exception("Invalid entity type.");
+            }
+
+            $mapStmt->execute([
+                ':entity_id' => $entityId,
+                ':image_id' => $imageId,
+                ':type' => $imageType
+            ]);
         }
-
-        $mapStmt->execute([
-            ':entity_id' => $entityId,
-            ':image_id'  => $imageId,
-            ':type'      => $imageType
-        ]);
 
         header("Location: index.php?success=1");
         exit;
@@ -153,6 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Upload Image</title>
@@ -166,115 +180,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6c757d;
             cursor: pointer;
         }
+
         .drop-zone.dragover {
             background: #e9f5ff;
             border-color: #0a58ca;
             color: #0a58ca;
         }
-        .drop-zone input { display: none; }
-        #preview img { max-width: 250px; margin-top: 10px; border-radius: 10px; }
+
+        .drop-zone input {
+            display: none;
+        }
+
+        #preview img {
+            max-width: 250px;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 
 <body class="bg-light">
-<?php require_once '../navbar/navbar.php'; ?>
+    <?php require_once '../navbar/navbar.php'; ?>
 
-<div class="container mt-5">
-    <h2>Upload Image</h2>
+    <div class="container mt-5">
+        <h2>Upload Image</h2>
 
-    <form method="post" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
+        <form method="post" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
 
-        <div class="mb-3">
-            <label class="form-label">Entity Type</label>
-            <select name="entity_type" id="entity_type" class="form-control" required>
-                <option value="">-- Select Type --</option>
-                <option value="restaurant">Restaurant</option>
-                <option value="blog">Blog</option>
-                <option value="recipe">Recipe</option>
-            </select>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Entity Type</label>
+                <select name="entity_type" id="entity_type" class="form-control" required>
+                    <option value="images">Standalone Image</option>
+                    <option value="restaurant">Restaurant</option>
+                    <option value="blog">Blog</option>
+                    <option value="recipe">Recipe</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Select Entity</label>
-            <select name="entity_id" id="entity_id" class="form-control" required></select>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Select Entity</label>
+                <select name="entity_id" id="entity_id" class="form-control"></select>
+            </div>
 
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-        <script>
-        $(function () {
-            $('#entity_id').select2({
-                placeholder: "Search...",
-                ajax: {
-                    url: 'fetch_entities.php',
-                    dataType: 'json',
-                    delay: 250,
-                    data: params => ({
-                        q: params.term,
-                        type: $('#entity_type').val()
-                    }),
-                    processResults: data => ({ results: data })
-                }
-            });
+            <script>
+                $(function () {
+                    $('#entity_id').select2({
+                        placeholder: "Search...",
+                        ajax: {
+                            url: 'fetch_entities.php',
+                            dataType: 'json',
+                            delay: 250,
+                            data: params => ({
+                                q: params.term,
+                                type: $('#entity_type').val()
+                            }),
+                            processResults: data => ({ results: data })
+                        }
+                    });
 
-            $('#entity_type').on('change', () => {
-                $('#entity_id').val(null).trigger('change');
-            });
-        });
-        </script>
+                    $('#entity_type').on('change', () => {
+                        $('#entity_id').val(null).trigger('change');
+                    });
+                });
+            </script>
 
-        <div class="mb-3">
-            <label class="form-label">Image Type</label>
-            <select name="image_type" class="form-control">
-                <option value="cover">Cover</option>
-                <option value="gallery">Gallery</option>
-                <option value="menu">Menu</option>
-                <option value="steps">Steps</option>
-                <option value="other">Other</option>
-            </select>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Image Type</label>
+                <select name="image_type" class="form-control">
+                    <option value="cover">Cover</option>
+                    <option value="gallery">Gallery</option>
+                    <option value="menu">Menu</option>
+                    <option value="steps">Steps</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
 
-        <div class="drop-zone mb-3" id="dropZone">
-            <p>Drag & Drop image or click</p>
-            <input type="file" name="image" id="image" accept="image/*,.avif">
-        </div>
+            <div class="drop-zone mb-3" id="dropZone">
+                <p>Drag & Drop image or click</p>
+                <input type="file" name="image" id="image" accept="image/*,.avif">
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Or Image URL</label>
-            <input type="text" name="image_url" class="form-control">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Or Image URL</label>
+                <input type="text" name="image_url" class="form-control">
+            </div>
 
-        <div id="preview"></div>
+            <div id="preview"></div>
 
-        <button class="btn btn-primary mt-3">Upload</button>
-        <a href="index.php" class="btn btn-secondary mt-3">Back</a>
-    </form>
-</div>
+            <button class="btn btn-primary mt-3">Upload</button>
+            <a href="index.php" class="btn btn-secondary mt-3">Back</a>
+        </form>
+    </div>
 
-<script>
-const dz = document.getElementById("dropZone");
-const fi = document.getElementById("image");
-const preview = document.getElementById("preview");
+    <script>
+        const dz = document.getElementById("dropZone");
+        const fi = document.getElementById("image");
+        const preview = document.getElementById("preview");
 
-dz.onclick = () => fi.click();
-dz.ondragover = e => { e.preventDefault(); dz.classList.add("dragover"); };
-dz.ondragleave = () => dz.classList.remove("dragover");
-dz.ondrop = e => {
-    e.preventDefault();
-    dz.classList.remove("dragover");
-    fi.files = e.dataTransfer.files;
-    showPreview(fi.files[0]);
-};
-fi.onchange = () => showPreview(fi.files[0]);
+        dz.onclick = () => fi.click();
+        dz.ondragover = e => { e.preventDefault(); dz.classList.add("dragover"); };
+        dz.ondragleave = () => dz.classList.remove("dragover");
+        dz.ondrop = e => {
+            e.preventDefault();
+            dz.classList.remove("dragover");
+            fi.files = e.dataTransfer.files;
+            showPreview(fi.files[0]);
+        };
+        fi.onchange = () => showPreview(fi.files[0]);
 
-function showPreview(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => preview.innerHTML = `<img src="${e.target.result}">`;
-    reader.readAsDataURL(file);
-}
-</script>
+        function showPreview(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => preview.innerHTML = `<img src="${e.target.result}">`;
+            reader.readAsDataURL(file);
+        }
+    </script>
 </body>
+
 </html>

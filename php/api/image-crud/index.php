@@ -27,25 +27,46 @@ function make_absolute_url(string $path): string
 
 // Fetch images with entity mapping
 $sql = "
+
     SELECT i.id, i.filename, i.filepath, i.uploaded_at,
            'restaurant' AS entity_type, r.id AS entity_id, r.name AS entity_name, ri.type AS image_type
       FROM images i
       JOIN restaurant_images ri ON i.id = ri.image_id
       JOIN restaurants r ON ri.restaurant_id = r.id
+
     UNION ALL
+
     SELECT i.id, i.filename, i.filepath, i.uploaded_at,
            'blog' AS entity_type, b.id AS entity_id, b.title AS entity_name, bi.type AS image_type
       FROM images i
       JOIN blog_images bi ON i.id = bi.image_id
       JOIN blogs b ON bi.blog_id = b.id
+
     UNION ALL
     SELECT i.id, i.filename, i.filepath, i.uploaded_at,
            'recipe' AS entity_type, rc.id AS entity_id, rc.title AS entity_name, ri.type AS image_type
       FROM images i
       JOIN recipe_images ri ON i.id = ri.image_id
       JOIN recipes rc ON ri.recipe_id = rc.id
+
+    UNION ALL
+    SELECT i.id, i.filename, i.filepath, i.uploaded_at,
+           'images' AS entity_type,
+           NULL AS entity_id,
+           'Standalone Image' AS entity_name,
+           'standalone' AS image_type
+      FROM images i
+      WHERE i.id NOT IN (
+            SELECT image_id FROM restaurant_images
+            UNION
+            SELECT image_id FROM blog_images
+            UNION
+            SELECT image_id FROM recipe_images
+      )
+
     ORDER BY id DESC
 ";
+
 $stmt = $pdo->query($sql);
 $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -119,8 +140,13 @@ $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 onclick="copyToClipboard('<?= htmlspecialchars($fullUrl, ENT_QUOTES) ?>')">Copy</button>
                         </td>
                         <td>
-                            <span class="badge bg-info text-dark"><?= htmlspecialchars($img['entity_type']) ?></span><br>
-                            <?= htmlspecialchars($img['entity_name']) ?> (ID: <?= (int) $img['entity_id'] ?>)
+                            <span
+                                class="badge <?= $img['entity_type'] === 'images' ? 'bg-dark' : 'bg-info text-dark' ?>">"><?= htmlspecialchars($img['entity_type']) ?></span><br>
+                            <?= htmlspecialchars($img['entity_name']) ?>
+                            <?php if ($img['entity_id']): ?>
+                                (ID: <?= (int) $img['entity_id'] ?>)
+                            <?php endif; ?>
+
                         </td>
                         <td><span class="badge bg-secondary"><?= htmlspecialchars($img['image_type']) ?></span></td>
                         <td><?= htmlspecialchars($img['uploaded_at']) ?></td>

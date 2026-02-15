@@ -12,9 +12,6 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
 }
 
-/**
- * Convert image binary to AVIF
- */
 function convertToAvif(string $imageData, string $target, int $quality = 45): bool
 {
     // ✅ Use Imagick if available
