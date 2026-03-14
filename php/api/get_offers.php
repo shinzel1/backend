@@ -1,6 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+header("Cache-Control: public, max-age=3600");
 require_once './db.php';
 
 // Get restaurant_id from query params

@@ -1,6 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+header("Cache-Control: public, max-age=3600");
 require_once './db.php';
 
 // 🔗 Helper function to make image URLs absolute

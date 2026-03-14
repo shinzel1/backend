@@ -2,6 +2,7 @@
 // Strict JSON and CORS headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+header("Cache-Control: public, max-age=3600");
 header('Access-Control-Allow-Headers: Authorization, Content-Type');
 
 require_once './db.php';

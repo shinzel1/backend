@@ -1,6 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+header('Content-Type: application/json');
+header("Cache-Control: public, max-age=3600");
 
 ini_set('display_errors', 0);
 ini_set('log_errors', 0);
